@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Screen } from '@/components/ui';
+import { BackupCard } from '@/features/backup/components/BackupCard';
 import { demoDataService } from '@/features/demo/services/demoDataService';
 import { useFocusQuery } from '@/hooks/useFocusQuery';
 import { colors, sizes, spacing } from '@/theme';
@@ -46,6 +47,8 @@ export default function ProfileScreen() {
 
   return (
     <Screen title="Perfil" subtitle="Configurações e preferências">
+      <BackupCard onRestored={demo.reload} />
+
       <Card style={styles.card}>
         <AppText variant="subtitle">Dados de exemplo</AppText>
         <AppText color="textSecondary">

@@ -106,6 +106,14 @@ export const maintenanceService = {
     await maintenanceRepository.remove(db, id);
   },
 
+  /** Agenda os lembretes de todas as tarefas abertas (ex.: depois de restaurar um backup). */
+  async rescheduleAllReminders(db: SQLiteDatabase): Promise<void> {
+    const open = await maintenanceRepository.listOpen(db, null);
+    for (const task of open) {
+      await syncReminder(db, task.id);
+    }
+  },
+
   /** Antes de excluir um aquário: as tarefas somem em cascata, mas os lembretes agendados não. */
   async cancelRemindersForAquarium(db: SQLiteDatabase, aquariumId: string): Promise<void> {
     const ids = await maintenanceRepository.listNotificationIds(db, aquariumId);

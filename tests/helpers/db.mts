@@ -1,5 +1,10 @@
 import { DatabaseSync } from 'node:sqlite';
 
+/** expo-sqlite aceita parâmetros variádicos ou um único array; o node:sqlite só variádicos. */
+function bind(params: unknown[]): never[] {
+  return (params.length === 1 && Array.isArray(params[0]) ? params[0] : params) as never[];
+}
+
 /**
  * Implementa o subconjunto da API do expo-sqlite usado pelo app sobre o SQLite do Node,
  * para rodar migrations, repositories e services reais sem celular.
@@ -11,13 +16,13 @@ export function createTestDatabase() {
       raw.exec(sql);
     },
     async runAsync(sql: string, ...params: unknown[]) {
-      return raw.prepare(sql).run(...(params as never[]));
+      return raw.prepare(sql).run(...bind(params));
     },
     async getAllAsync(sql: string, ...params: unknown[]) {
-      return raw.prepare(sql).all(...(params as never[]));
+      return raw.prepare(sql).all(...bind(params));
     },
     async getFirstAsync(sql: string, ...params: unknown[]) {
-      return raw.prepare(sql).get(...(params as never[])) ?? null;
+      return raw.prepare(sql).get(...bind(params)) ?? null;
     },
     async withTransactionAsync(task: () => Promise<void>) {
       raw.exec('BEGIN');

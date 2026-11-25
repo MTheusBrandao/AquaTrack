@@ -8,6 +8,7 @@ Aplicativo mobile para gerenciamento e monitoramento de aquários (água doce, s
 
 - Navegação com 5 abas (Início, Aquários, Monitorar, Manutenção, Perfil).
 - Dashboard com dados reais: totais (aquários, parâmetros em atenção, tarefas atrasadas), atalhos (novo aquário, registrar medição, nova tarefa, adicionar organismo), parâmetros fora da faixa, manutenções atrasadas e próximas (concluíveis ali mesmo), últimas medições e resumo de cada aquário.
+- Backup: exportar todos os dados para um arquivo JSON (folha de compartilhamento do iOS/Android) e restaurar a partir dele, com validação e confirmação. A restauração é atômica: um arquivo inválido não altera nada. Fotos não entram no backup.
 - Dados de exemplo: dois aquários marcados como “Exemplo”, com um mês de medições, organismos e manutenções. Carregados pelo Perfil (ou pelo dashboard vazio) e removíveis sem afetar os dados do usuário.
 - Aquários: criar, editar, excluir (com confirmação), listar e ver detalhes. Campos: nome, tipo de água, volume, dimensões, data de montagem, temperatura desejada, descrição e foto opcional.
 - Fauna e flora: adicionar organismos a partir de um catálogo filtrado pelo tipo de água, buscar por nome popular ou científico, cadastrar manualmente espécies fora do catálogo, editar quantidade/data/observações e remover.
@@ -29,6 +30,7 @@ Aplicativo mobile para gerenciamento e monitoramento de aquários (água doce, s
 | @react-native-community/datetimepicker | 9.x | Seleção de datas |
 | expo-crypto | 58 | Geração de UUIDs |
 | expo-notifications | 58 | Lembretes locais de manutenção |
+| expo-sharing + expo-document-picker | 58 | Exportar e importar backup |
 | lucide-react-native + react-native-svg | 1.x / 15.x | Ícones |
 
 Todas as bibliotecas nativas acima fazem parte do Expo Go, então não é preciso development build.
@@ -61,7 +63,7 @@ npx expo-doctor      # compatibilidade de dependências
 npm test             # testes (Node 22.6+)
 ```
 
-Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
+Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, backup e restauração, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
 
 ## Arquitetura
 
@@ -93,6 +95,7 @@ src/
 │   ├── monitoring/             # + utils/parameterStatus
 │   ├── maintenance/            # + utils/recurrence, services/reminderScheduler
 │   ├── dashboard/              # agregação dos módulos para a tela inicial
+│   ├── backup/                 # exportação/restauração em JSON
 │   └── demo/                   # carga e remoção dos dados de exemplo
 ├── database/
 │   ├── database.ts             # abertura, PRAGMAs e execução das migrations
@@ -154,6 +157,7 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 - **Faixas de referência são gerais** por tipo de água e o app avisa isso na tela; a sinalização é "fora da faixa" (atenção), sem recomendações automáticas a partir de uma única medição. Faixas por espécie ficam para o futuro.
 - **Lembretes**: uma notificação local por tarefa, para a próxima execução, reagendada a cada conclusão/edição. A permissão é pedida só ao salvar a primeira tarefa com lembrete. Notificações locais funcionam no Expo Go; falhas de notificação nunca impedem salvar a tarefa.
 - **Dados de exemplo pendem de aquários marcados** (`is_demo`): remover é só apagar esses aquários, e a cascata leva o resto. Nada fictício fica misturado com dados reais, e os lembretes de exemplo vêm desligados.
+- **Backup em JSON, substituindo tudo**: mesclar dois conjuntos de dados geraria conflitos difíceis de explicar ao usuário. O arquivo traz `schemaVersion`; colunas ausentes (backup de versão anterior) recebem o padrão do schema atual e versões mais novas são recusadas. Nomes de tabela/coluna vêm de uma lista fixa no código, nunca do arquivo. Fotos e ids de notificação são específicos do aparelho e não são restaurados.
 - **Tema somente claro** (`userInterfaceStyle: light`) e **fontes do sistema**.
 
 ## Roadmap
@@ -167,7 +171,7 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 
 - Faixas de referência são gerais por tipo de água; não consideram as espécies do aquário.
 - Salinidade/densidade ainda não é monitorada (importante para marinho e salobra).
-- Sem backup: os dados ficam só no aparelho e são perdidos se o app (ou o Expo Go) for desinstalado.
+- O backup é manual e não inclui as fotos dos aquários.
 - No Expo Go o app roda dentro do container do Expo Go; para publicar, seria preciso um build próprio (EAS Build).
 
 ## Funcionalidades futuras
