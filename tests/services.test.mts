@@ -35,7 +35,7 @@ async function setup() {
 
 test('migrations chegam à versão mais recente', async () => {
   const { raw } = await setup();
-  assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 3);
+  assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 4);
 });
 
 test('medição grava só os parâmetros preenchidos', async () => {
@@ -120,4 +120,24 @@ test('dados de exemplo: carregar, resumir no dashboard e remover sem tocar nos d
   assert.deepEqual(summary.aquariums.map((item: { aquarium: { id: string } }) => item.aquarium.id), [ownId]);
   assert.equal(summary.recentRecords.length, 0);
   assert.equal(summary.hasDemoData, false);
+});
+
+test('parâmetros marinhos aparecem só onde se aplicam', async () => {
+  const { db } = await setup();
+  const ids = async (type: string) => {
+    const id = await aquariumService.create(db, { ...aquariumInput, type });
+    const result = await monitoringService.getApplicableParameters(db, id);
+    return result.parameters.map((parameter: { id: string }) => parameter.id);
+  };
+  const salt = await ids('saltwater');
+  const fresh = await ids('freshwater');
+  const brackish = await ids('brackish');
+
+  for (const key of ['salinity', 'calcium', 'magnesium', 'phosphate']) assert.ok(salt.includes(key), key);
+  assert.ok(!fresh.some((key: string) => ['salinity', 'calcium', 'magnesium', 'phosphate'].includes(key)));
+  assert.ok(brackish.includes('salinity') && !brackish.includes('calcium'));
+
+  const reef = await demoDataService.load(db).then(() => dashboardService.getSummary(db));
+  const reefSummary = reef.aquariums.find((item: { aquarium: { type: string; isDemo: boolean } }) => item.aquarium.type === 'saltwater' && item.aquarium.isDemo);
+  assert.equal(reefSummary.attentionCount, 0, 'exemplo marinho dentro das faixas');
 });

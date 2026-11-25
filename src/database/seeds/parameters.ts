@@ -11,6 +11,14 @@ export const PARAMETER_TYPES: ParameterType[] = [
   { id: 'kh', name: 'KH', unit: 'dKH', decimals: 1 },
 ];
 
+/** Adicionados na migration 4. Seeds já distribuídos nunca são alterados. */
+export const MARINE_PARAMETER_TYPES: ParameterType[] = [
+  { id: 'salinity', name: 'Salinidade', unit: 'ppt', decimals: 1 },
+  { id: 'calcium', name: 'Cálcio', unit: 'mg/L', decimals: 0 },
+  { id: 'magnesium', name: 'Magnésio', unit: 'mg/L', decimals: 0 },
+  { id: 'phosphate', name: 'Fosfato', unit: 'mg/L', decimals: 2 },
+];
+
 type ReferenceSeed = {
   parameterId: ParameterKey;
   aquariumType: AquariumType;
@@ -49,4 +57,12 @@ export const PARAMETER_REFERENCES: ReferenceSeed[] = [
   { parameterId: 'nitrate', aquariumType: 'brackish', min: 0, max: 40, description: 'Valores altos indicam necessidade de trocas parciais.' },
   { parameterId: 'gh', aquariumType: 'brackish', min: null, max: null, description: 'Varia muito conforme a salinidade e a espécie.' },
   { parameterId: 'kh', aquariumType: 'brackish', min: null, max: null, description: 'Varia muito conforme a salinidade e a espécie.' },
+];
+
+export const MARINE_PARAMETER_REFERENCES: ReferenceSeed[] = [
+  { parameterId: 'salinity', aquariumType: 'saltwater', min: 33, max: 36, description: 'Equivale a densidade de cerca de 1,024 a 1,027. Muitos recifes usam 35 ppt.' },
+  { parameterId: 'calcium', aquariumType: 'saltwater', min: 380, max: 450, description: 'Necessário para corais duros e algas calcárias.' },
+  { parameterId: 'magnesium', aquariumType: 'saltwater', min: 1250, max: 1400, description: 'Ajuda a manter cálcio e alcalinidade estáveis.' },
+  { parameterId: 'phosphate', aquariumType: 'saltwater', min: 0, max: 0.1, description: 'Valores altos favorecem algas; aquários só com peixes toleram mais.' },
+  { parameterId: 'salinity', aquariumType: 'brackish', min: null, max: null, description: 'Varia muito conforme a espécie (de quase doce a quase marinho).' },
 ];

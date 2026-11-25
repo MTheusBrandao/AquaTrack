@@ -12,7 +12,7 @@ Aplicativo mobile para gerenciamento e monitoramento de aquários (água doce, s
 - Dados de exemplo: dois aquários marcados como “Exemplo”, com um mês de medições, organismos e manutenções. Carregados pelo Perfil (ou pelo dashboard vazio) e removíveis sem afetar os dados do usuário.
 - Aquários: criar, editar, excluir (com confirmação), listar e ver detalhes. Campos: nome, tipo de água, volume, dimensões, data de montagem, temperatura desejada, descrição e foto opcional.
 - Fauna e flora: adicionar organismos a partir de um catálogo filtrado pelo tipo de água, buscar por nome popular ou científico, cadastrar manualmente espécies fora do catálogo, editar quantidade/data/observações e remover.
-- Monitoramento: registrar medições (temperatura, pH, amônia, nitrito, nitrato, GH, KH) com data e hora; última leitura de cada parâmetro com status e tendência; histórico com filtro por período (7, 30, 90 dias ou tudo), gráfico com a faixa de referência e exclusão de medições.
+- Monitoramento: registrar medições (temperatura, pH, amônia, nitrito, nitrato, GH, KH e, para marinho, salinidade, cálcio, magnésio e fosfato) com data e hora; última leitura de cada parâmetro com status e tendência; histórico com filtro por período (7, 30, 90 dias ou tudo), gráfico com a faixa de referência e exclusão de medições.
 - Manutenção: criar, editar, concluir e excluir tarefas (troca de água, filtros, testes, poda, limpeza, nutrientes, alimentação); recorrência diária, semanal, quinzenal ou mensal; status pendente/atrasada/concluída; histórico de conclusões; lembretes por notificação local.
 - Estados de carregamento, vazio e erro; validação de formulários em português.
 
@@ -110,14 +110,14 @@ tests/                          # testes em Node (npm test) + stubs dos módulos
 
 Fluxo de dados: **tela → hook da feature → service → repository → SQLite**. Telas não contêm SQL; services concentram regras (ex.: copiar/remover a foto, transação ao criar espécie manual).
 
-## Modelo de dados (schema v3)
+## Modelo de dados (schema v4)
 
 | Tabela | Destaques |
 |---|---|
 | `aquariums` | `type` com CHECK (`freshwater`, `saltwater`, `brackish`); `volume > 0`; dimensões e temperatura opcionais (NULL = não informado); `is_demo` marca os dados de exemplo |
 | `species` | catálogo + espécies do usuário (`is_custom`); `water_type` permite filtrar o catálogo pelo tipo do aquário |
 | `aquarium_species` | `aquarium_id` com `ON DELETE CASCADE`; `species_id` com `ON DELETE RESTRICT`; `quantity > 0` |
-| `parameter_types` | os 7 parâmetros, unidade e casas decimais |
+| `parameter_types` | 11 parâmetros (7 gerais + salinidade, cálcio, magnésio e fosfato da migration 4), unidade e casas decimais |
 | `parameter_references` | faixa geral por parâmetro **e tipo de água**; a existência da linha define se o parâmetro se aplica (ex.: GH não aparece em marinho); min/max nulos = sem faixa geral |
 | `parameter_records` | uma linha por parâmetro medido; ausência de linha = não medido (zero é gravado como 0) |
 | `maintenance_tasks` | definição da tarefa, `starts_at` (âncora da recorrência) e `scheduled_at` (próxima execução) |
@@ -170,10 +170,9 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 ## Limitações conhecidas
 
 - Faixas de referência são gerais por tipo de água; não consideram as espécies do aquário.
-- Salinidade/densidade ainda não é monitorada (importante para marinho e salobra).
 - O backup é manual e não inclui as fotos dos aquários.
 - No Expo Go o app roda dentro do container do Expo Go; para publicar, seria preciso um build próprio (EAS Build).
 
 ## Funcionalidades futuras
 
-Salinidade/densidade para marinho e salobra, faixas por espécie, sensores IoT, sincronização em nuvem/Supabase, autenticação, compartilhamento de aquários, compatibilidade entre espécies, recomendações, catálogo ampliado, controle de equipamentos.
+Faixas por espécie, alcalinidade em outras unidades (meq/L), sensores IoT, sincronização em nuvem/Supabase, autenticação, compartilhamento de aquários, compatibilidade entre espécies, recomendações, catálogo ampliado, controle de equipamentos.

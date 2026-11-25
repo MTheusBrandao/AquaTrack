@@ -6,6 +6,10 @@ export const PARAMETER_KEYS = [
   'nitrate',
   'gh',
   'kh',
+  'salinity',
+  'calcium',
+  'magnesium',
+  'phosphate',
 ] as const;
 
 export type ParameterKey = (typeof PARAMETER_KEYS)[number];

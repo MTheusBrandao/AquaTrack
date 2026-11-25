@@ -32,7 +32,7 @@ await aquariumRepository.insert(db, 'fresh', { ...base, name: 'Doce', type: 'fre
 await aquariumRepository.insert(db, 'salt', { ...base, name: 'Marinho', type: 'saltwater', volume: 200 }, now);
 
 await initializeDatabase(db);
-assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 3);
+assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 4);
 assert.equal((await aquariumRepository.listWithStats(db)).length, 2, 'dados da v1 preservados');
 
 // Parâmetros aplicáveis por tipo

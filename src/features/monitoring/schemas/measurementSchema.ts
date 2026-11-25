@@ -16,6 +16,10 @@ const values = z.object({
   nitrate: optionalDecimal({ min: 0, max: 500, unit: 'mg/L' }),
   gh: optionalDecimal({ min: 0, max: 50, unit: 'dGH' }),
   kh: optionalDecimal({ min: 0, max: 50, unit: 'dKH' }),
+  salinity: optionalDecimal({ min: 0, max: 50, unit: 'ppt' }),
+  calcium: optionalDecimal({ min: 0, max: 1000, unit: 'mg/L' }),
+  magnesium: optionalDecimal({ min: 0, max: 3000, unit: 'mg/L' }),
+  phosphate: optionalDecimal({ min: 0, max: 10, unit: 'mg/L' }),
 } satisfies Record<ParameterKey, unknown>);
 
 const FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
@@ -43,6 +47,18 @@ export function emptyMeasurementForm(): MeasurementFormValues {
   return {
     measuredAt: new Date().toISOString(),
     notes: '',
-    values: { temperature: '', ph: '', ammonia: '', nitrite: '', nitrate: '', gh: '', kh: '' },
+    values: {
+      temperature: '',
+      ph: '',
+      ammonia: '',
+      nitrite: '',
+      nitrate: '',
+      gh: '',
+      kh: '',
+      salinity: '',
+      calcium: '',
+      magnesium: '',
+      phosphate: '',
+    },
   };
 }

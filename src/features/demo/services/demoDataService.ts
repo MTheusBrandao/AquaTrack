@@ -87,6 +87,10 @@ const DEMO: DemoAquarium[] = [
       nitrite: [0, 0, 0, 0, 0, 0],
       nitrate: [5, 5, 10, 10, 15, 10],
       kh: [8, 8.5, 8.2, 7.9, 8.1, 8.3],
+      salinity: [35, 35, 34.5, 35, 35.5, 35],
+      calcium: [420, 410, 400, 415, 420, 410],
+      magnesium: [1300, 1320, 1290, 1310, 1300, 1330],
+      phosphate: [0.03, 0.05, 0.04, 0.06, 0.05, 0.04],
     },
     tasks: [
       { title: 'Limpeza do skimmer', category: 'filter_cleaning', description: null, frequency: 'monthly', inDays: 6, lastCompletedDaysAgo: 24 },
