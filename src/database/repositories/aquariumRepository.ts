@@ -19,6 +19,7 @@ type AquariumRow = {
   target_temperature: number | null;
   description: string | null;
   image_uri: string | null;
+  is_demo: number;
   created_at: string;
   updated_at: string;
 };
@@ -36,6 +37,7 @@ function toAquarium(row: AquariumRow): Aquarium {
     targetTemperature: row.target_temperature,
     description: row.description,
     imageUri: row.image_uri,
+    isDemo: row.is_demo === 1,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -99,6 +101,15 @@ export const aquariumRepository = {
       now,
       id,
     );
+  },
+
+  async markDemo(db: SQLiteDatabase, id: string): Promise<void> {
+    await db.runAsync('UPDATE aquariums SET is_demo = 1 WHERE id = ?', id);
+  },
+
+  async listDemoIds(db: SQLiteDatabase): Promise<string[]> {
+    const rows = await db.getAllAsync<{ id: string }>('SELECT id FROM aquariums WHERE is_demo = 1');
+    return rows.map((row) => row.id);
   },
 
   /** Organismos do aquário são removidos em cascata (ON DELETE CASCADE). */

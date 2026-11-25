@@ -26,6 +26,13 @@ type RecordRow = {
   notes: string | null;
 };
 
+export type RecentRecord = ParameterRecord & {
+  aquariumName: string;
+  parameterName: string;
+  unit: string;
+  decimals: number;
+};
+
 function toRecord(row: RecordRow): ParameterRecord {
   return {
     id: row.id,
@@ -109,6 +116,29 @@ export const parameterRepository = {
       aquariumId,
     );
     return rows.map(toRecord);
+  },
+
+  /** Medições mais recentes de todos os aquários, com nome do aquário e do parâmetro. */
+  async listRecent(db: SQLiteDatabase, limit: number): Promise<RecentRecord[]> {
+    const rows = await db.getAllAsync<
+      RecordRow & { aquarium_name: string; parameter_name: string; unit: string; decimals: number }
+    >(
+      `SELECT r.id, r.aquarium_id, r.parameter_type_id, r.value, r.measured_at, r.notes,
+              a.name AS aquarium_name, t.name AS parameter_name, t.unit, t.decimals
+       FROM parameter_records r
+       JOIN aquariums a ON a.id = r.aquarium_id
+       JOIN parameter_types t ON t.id = r.parameter_type_id
+       ORDER BY r.measured_at DESC, r.created_at DESC
+       LIMIT ?`,
+      limit,
+    );
+    return rows.map((row) => ({
+      ...toRecord(row),
+      aquariumName: row.aquarium_name,
+      parameterName: row.parameter_name,
+      unit: row.unit,
+      decimals: row.decimals,
+    }));
   },
 
   async deleteRecord(db: SQLiteDatabase, id: string): Promise<void> {

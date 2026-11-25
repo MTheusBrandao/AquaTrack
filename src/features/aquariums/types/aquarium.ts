@@ -25,6 +25,8 @@ export type Aquarium = {
   description: string | null;
   /** Caminho relativo ao diretório de documentos do app (ver imageStorage). */
   imageUri: string | null;
+  /** Aquário de demonstração (dados de exemplo removíveis no Perfil). */
+  isDemo: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -34,4 +36,4 @@ export type AquariumWithStats = Aquarium & {
   speciesCount: number;
 };
 
-export type AquariumInput = Omit<Aquarium, 'id' | 'createdAt' | 'updatedAt'>;
+export type AquariumInput = Omit<Aquarium, 'id' | 'isDemo' | 'createdAt' | 'updatedAt'>;

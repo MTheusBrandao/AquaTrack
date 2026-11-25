@@ -27,7 +27,10 @@ export function AquariumCard({ aquarium }: { aquarium: AquariumWithStats }) {
           <AppText variant="subtitle" numberOfLines={1}>
             {aquarium.name}
           </AppText>
-          <Badge label={AQUARIUM_TYPE_LABELS[aquarium.type]} />
+          <View style={styles.badges}>
+            <Badge label={AQUARIUM_TYPE_LABELS[aquarium.type]} />
+            {aquarium.isDemo ? <Badge label="Exemplo" /> : null}
+          </View>
           <AppText variant="caption" color="textSecondary">
             {formatNumber(aquarium.volume)} L · {speciesLabel(aquarium.speciesCount)}
           </AppText>
@@ -51,6 +54,10 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
+    gap: spacing.xs,
+  },
+  badges: {
+    flexDirection: 'row',
     gap: spacing.xs,
   },
   pressed: {
