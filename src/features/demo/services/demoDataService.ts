@@ -1,11 +1,13 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { aquariumRepository } from '@/database/repositories/aquariumRepository';
+import { equipmentRepository } from '@/database/repositories/equipmentRepository';
 import { maintenanceRepository } from '@/database/repositories/maintenanceRepository';
 import { parameterRepository } from '@/database/repositories/parameterRepository';
 import { speciesRepository } from '@/database/repositories/speciesRepository';
 import { aquariumService } from '@/features/aquariums/services/aquariumService';
 import type { AquariumInput } from '@/features/aquariums/types/aquarium';
+import type { EquipmentInput } from '@/features/equipment/types/equipment';
 import type { MaintenanceInput } from '@/features/maintenance/types/maintenance';
 import type { ParameterKey } from '@/features/monitoring/types/parameter';
 import { createId } from '@/utils/id';
@@ -18,10 +20,13 @@ type DemoAquarium = {
   aquarium: Omit<AquariumInput, 'setupDate'> & { setupDaysAgo: number };
   organisms: { speciesId: string; quantity: number }[];
   measurements: Partial<Record<ParameterKey, number[]>>;
-  tasks: (Omit<MaintenanceInput, 'aquariumId' | 'scheduledAt' | 'reminderEnabled'> & {
+  equipment: Omit<EquipmentInput, 'aquariumId' | 'installedAt' | 'notes'>[];
+  tasks: (Omit<MaintenanceInput, 'aquariumId' | 'scheduledAt' | 'reminderEnabled' | 'equipmentId'> & {
     /** Dias a partir de hoje (negativo = atrasada). */
     inDays: number;
     lastCompletedDaysAgo?: number;
+    /** Índice em `equipment` do equipamento vinculado. */
+    equipmentIndex?: number;
   })[];
 };
 
@@ -56,7 +61,14 @@ const DEMO: DemoAquarium[] = [
       gh: [8, 8, 7, 8, 8, 7],
       kh: [4, 4, 5, 4, 4, 4],
     },
+    equipment: [
+      { name: 'Filtro canister', category: 'filter', brand: null, model: null, powerWatts: 15 },
+      { name: 'Aquecedor 150 W', category: 'heater', brand: null, model: null, powerWatts: 150 },
+      { name: 'Luminária LED', category: 'lighting', brand: null, model: null, powerWatts: 40 },
+      { name: 'Cilindro de CO₂', category: 'co2', brand: null, model: null, powerWatts: null },
+    ],
     tasks: [
+      { title: 'Limpeza do filtro canister', category: 'filter_cleaning', description: null, frequency: 'monthly', inDays: 12, lastCompletedDaysAgo: 18, equipmentIndex: 0 },
       { title: 'Troca parcial de água (30%)', category: 'water_change', description: null, frequency: 'weekly', inDays: -1, lastCompletedDaysAgo: 8 },
       { title: 'Poda das plantas', category: 'plant_trimming', description: null, frequency: 'biweekly', inDays: 3 },
     ],
@@ -92,8 +104,13 @@ const DEMO: DemoAquarium[] = [
       magnesium: [1300, 1320, 1290, 1310, 1300, 1330],
       phosphate: [0.03, 0.05, 0.04, 0.06, 0.05, 0.04],
     },
+    equipment: [
+      { name: 'Skimmer', category: 'skimmer', brand: null, model: null, powerWatts: 10 },
+      { name: 'Bomba de circulação', category: 'pump', brand: null, model: null, powerWatts: 8 },
+      { name: 'Luminária LED marinha', category: 'lighting', brand: null, model: null, powerWatts: 50 },
+    ],
     tasks: [
-      { title: 'Limpeza do skimmer', category: 'filter_cleaning', description: null, frequency: 'monthly', inDays: 6, lastCompletedDaysAgo: 24 },
+      { title: 'Limpeza do skimmer', category: 'filter_cleaning', description: null, frequency: 'monthly', inDays: 6, lastCompletedDaysAgo: 24, equipmentIndex: 0 },
       { title: 'Teste de parâmetros', category: 'parameter_test', description: null, frequency: 'weekly', inDays: 1 },
     ],
   },
@@ -163,7 +180,24 @@ export const demoDataService = {
           }
         }
 
-        for (const { inDays, lastCompletedDaysAgo, ...task } of demo.tasks) {
+        const equipmentIds: string[] = [];
+        for (const item of demo.equipment) {
+          const equipmentId = createId();
+          equipmentIds.push(equipmentId);
+          await equipmentRepository.insert(
+            db,
+            equipmentId,
+            {
+              ...item,
+              aquariumId,
+              installedAt: toLocalDateString(daysFromNow(-setupDaysAgo, 12)),
+              notes: null,
+            },
+            now,
+          );
+        }
+
+        for (const { inDays, lastCompletedDaysAgo, equipmentIndex, ...task } of demo.tasks) {
           const taskId = createId();
           await maintenanceRepository.insert(
             db,
@@ -173,6 +207,7 @@ export const demoDataService = {
               aquariumId,
               scheduledAt: daysFromNow(inDays, 10).toISOString(),
               reminderEnabled: false,
+              equipmentId: equipmentIndex === undefined ? null : equipmentIds[equipmentIndex],
             },
             now,
           );

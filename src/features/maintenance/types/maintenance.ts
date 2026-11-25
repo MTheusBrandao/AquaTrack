@@ -53,6 +53,8 @@ export type MaintenanceTask = {
   completedAt: string | null;
   reminderEnabled: boolean;
   notificationId: string | null;
+  equipmentId: string | null;
+  equipmentName: string | null;
 };
 
 export type MaintenanceInput = {
@@ -63,6 +65,8 @@ export type MaintenanceInput = {
   frequency: Frequency;
   scheduledAt: string;
   reminderEnabled: boolean;
+  /** Equipamento do mesmo aquário ao qual a tarefa se refere (opcional). */
+  equipmentId: string | null;
 };
 
 export type MaintenanceLog = {

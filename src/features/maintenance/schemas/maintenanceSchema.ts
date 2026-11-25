@@ -6,6 +6,7 @@ import {
   FREQUENCIES,
   MAINTENANCE_CATEGORIES,
   MAINTENANCE_CATEGORY_LABELS,
+  type MaintenanceCategory,
   type MaintenanceInput,
   type MaintenanceTask,
 } from '../types/maintenance';
@@ -19,6 +20,7 @@ export const maintenanceSchema = z
     frequency: z.enum(FREQUENCIES, 'Escolha a frequência.'),
     scheduledAt: z.string().min(1, 'Escolha data e hora.'),
     reminderEnabled: z.boolean(),
+    equipmentId: z.string().nullable(),
   })
   // Título vazio usa o nome da categoria, para não obrigar o usuário a digitar o óbvio.
   .transform((values) => ({
@@ -39,10 +41,14 @@ function defaultSchedule(): string {
   return date.toISOString();
 }
 
-export function emptyMaintenanceForm(aquariumId: string): MaintenanceFormValues {
+export function emptyMaintenanceForm(
+  aquariumId: string,
+  preset?: { equipmentId: string; category: MaintenanceCategory },
+): MaintenanceFormValues {
   return {
     aquariumId,
-    category: 'water_change',
+    equipmentId: preset?.equipmentId ?? null,
+    category: preset?.category ?? 'water_change',
     title: '',
     description: '',
     frequency: 'weekly',
@@ -60,5 +66,6 @@ export function maintenanceToForm(task: MaintenanceTask): MaintenanceFormValues 
     frequency: task.frequency,
     scheduledAt: task.scheduledAt,
     reminderEnabled: task.reminderEnabled,
+    equipmentId: task.equipmentId,
   };
 }

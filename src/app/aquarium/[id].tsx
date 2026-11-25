@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { CalendarPlus, ChartLine, Pencil, Plus, Sprout, Trash2 } from 'lucide-react-native';
+import { CalendarPlus, ChartLine, Pencil, Plug, Plus, Sprout, Trash2 } from 'lucide-react-native';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import {
@@ -17,6 +17,7 @@ import { AquariumImage } from '@/features/aquariums/components/AquariumImage';
 import { useAquariumDetails } from '@/features/aquariums/hooks/useAquariums';
 import { aquariumService } from '@/features/aquariums/services/aquariumService';
 import { AQUARIUM_TYPE_LABELS, type Aquarium } from '@/features/aquariums/types/aquarium';
+import { EquipmentRow } from '@/features/equipment/components/EquipmentRow';
 import { OrganismRow } from '@/features/species/components/OrganismRow';
 import { colors, sizes, spacing } from '@/theme';
 import { formatLocalDate, formatNumber } from '@/utils/format';
@@ -59,16 +60,20 @@ export default function AquariumDetailsScreen() {
     );
   }
 
-  const { aquarium, organisms } = data;
+  const { aquarium, organisms, equipment } = data;
   const dimensions = formatDimensions(aquarium);
 
   function openAddOrganism() {
     router.push({ pathname: '/aquarium/add-species/[id]', params: { id } });
   }
 
+  function openAddEquipment() {
+    router.push({ pathname: '/equipment/create/[id]', params: { id } });
+  }
+
   function confirmDelete() {
     const organismsNote =
-      ' Organismos, medições, tarefas e histórico de manutenção deste aquário também serão excluídos.';
+      ' Organismos, equipamentos, medições, tarefas e histórico de manutenção deste aquário também serão excluídos.';
     Alert.alert('Excluir aquário?', `“${aquarium.name}” será removido permanentemente.${organismsNote}`, [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -172,6 +177,34 @@ export default function AquariumDetailsScreen() {
           title="Nenhum organismo"
           description="Registre peixes, plantas, corais e invertebrados que vivem neste aquário."
           action={<Button label="Adicionar organismo" onPress={openAddOrganism} />}
+        />
+      )}
+
+      <View style={styles.sectionHeader}>
+        <AppText variant="subtitle">Equipamentos</AppText>
+        {equipment.length ? (
+          <Button
+            label="Adicionar"
+            size="small"
+            variant="secondary"
+            icon={<Plus size={sizes.iconSm} color={colors.primary} />}
+            onPress={openAddEquipment}
+          />
+        ) : null}
+      </View>
+
+      {equipment.length ? (
+        <Card style={styles.list}>
+          {equipment.map((item) => (
+            <EquipmentRow key={item.id} equipment={item} />
+          ))}
+        </Card>
+      ) : (
+        <EmptyState
+          icon={Plug}
+          title="Nenhum equipamento"
+          description="Cadastre filtro, aquecedor, iluminação e outros para vincular as manutenções a eles."
+          action={<Button label="Adicionar equipamento" variant="secondary" onPress={openAddEquipment} />}
         />
       )}
 

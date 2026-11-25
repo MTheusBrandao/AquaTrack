@@ -7,9 +7,14 @@ export const BACKUP_APP_ID = 'aquatrack';
 const value = z.union([z.string(), z.number(), z.null()]);
 const row = z.record(z.string(), value).refine((item) => typeof item.id === 'string', 'Registro sem id.');
 
+// Tabelas criadas depois do schema 3 podem faltar em backups antigos e viram listas vazias.
+// As demais são obrigatórias: um arquivo sem elas está incompleto.
 const dataShape = Object.fromEntries(
-  BACKUP_TABLES.map((table) => [table.name, z.array(row)]),
-) as Record<BackupTableName, z.ZodArray<typeof row>>;
+  BACKUP_TABLES.map((table) => [
+    table.name,
+    'addedInSchema' in table ? z.array(row).default([]) : z.array(row),
+  ]),
+) as unknown as Record<BackupTableName, z.ZodType<z.infer<typeof row>[]>>;
 
 /**
  * Estrutura do arquivo. Aqui só se valida o formato; as regras de negócio (tipos válidos,

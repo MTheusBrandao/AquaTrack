@@ -1,7 +1,9 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { aquariumRepository } from '@/database/repositories/aquariumRepository';
+import { equipmentRepository } from '@/database/repositories/equipmentRepository';
 import { speciesRepository } from '@/database/repositories/speciesRepository';
+import type { Equipment } from '@/features/equipment/types/equipment';
 import { maintenanceService } from '@/features/maintenance/services/maintenanceService';
 import type { AquariumOrganism } from '@/features/species/types/species';
 import { createId } from '@/utils/id';
@@ -12,6 +14,7 @@ import { deleteStoredImage, isStoredImage, persistImage } from './aquariumImageS
 export type AquariumDetails = {
   aquarium: Aquarium;
   organisms: AquariumOrganism[];
+  equipment: Equipment[];
 };
 
 /** Garante que imageUri aponte para um arquivo do app, copiando imagens recém-escolhidas. */
@@ -28,8 +31,11 @@ export const aquariumService = {
   async getDetails(db: SQLiteDatabase, id: string): Promise<AquariumDetails | null> {
     const aquarium = await aquariumRepository.findById(db, id);
     if (!aquarium) return null;
-    const organisms = await speciesRepository.listOrganisms(db, id);
-    return { aquarium, organisms };
+    const [organisms, equipment] = await Promise.all([
+      speciesRepository.listOrganisms(db, id),
+      equipmentRepository.list(db, id),
+    ]);
+    return { aquarium, organisms, equipment };
   },
 
   get(db: SQLiteDatabase, id: string): Promise<Aquarium | null> {

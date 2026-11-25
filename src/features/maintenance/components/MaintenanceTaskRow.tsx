@@ -84,6 +84,7 @@ export function MaintenanceTaskRow({ task, showAquarium = true, onCompleted }: M
         </AppText>
         <AppText variant="caption" color="textSecondary" numberOfLines={1}>
           {showAquarium ? `${task.aquariumName} · ` : ''}
+          {task.equipmentName ? `${task.equipmentName} · ` : ''}
           {FREQUENCY_LABELS[task.frequency]}
         </AppText>
         <AppText variant="caption" color={status === 'overdue' ? 'critical' : 'textSecondary'}>

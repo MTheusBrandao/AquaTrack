@@ -37,10 +37,21 @@ export const BACKUP_TABLES = [
     where: '1 = 1',
   },
   {
+    name: 'equipment',
+    columns: [
+      'id', 'aquarium_id', 'name', 'category', 'brand', 'model', 'power_watts', 'installed_at',
+      'notes', 'created_at', 'updated_at',
+    ],
+    where: '1 = 1',
+    /** Tabela criada no schema 5: backups anteriores não a contêm. */
+    addedInSchema: 5,
+  },
+  {
     name: 'maintenance_tasks',
     columns: [
       'id', 'aquarium_id', 'title', 'category', 'description', 'frequency', 'starts_at',
-      'scheduled_at', 'completed_at', 'reminder_enabled', 'notification_id', 'created_at', 'updated_at',
+      'scheduled_at', 'completed_at', 'reminder_enabled', 'notification_id', 'equipment_id',
+      'created_at', 'updated_at',
     ],
     where: '1 = 1',
   },

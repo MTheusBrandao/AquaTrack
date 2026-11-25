@@ -47,6 +47,7 @@ export default function EditMaintenanceScreen() {
       <MaintenanceForm
         key={data.task.id}
         aquariums={data.aquariums}
+        equipment={data.equipment}
         defaultValues={maintenanceToForm(data.task)}
         submitLabel="Salvar alterações"
         onSubmit={handleSubmit}

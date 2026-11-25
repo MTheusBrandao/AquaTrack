@@ -3,6 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 
 import { ErrorState, LoadingState, Screen } from '@/components/ui';
+import { SUGGESTED_MAINTENANCE } from '@/features/equipment/types/equipment';
 import { MaintenanceForm } from '@/features/maintenance/components/MaintenanceForm';
 import { useMaintenanceFormData } from '@/features/maintenance/hooks/useMaintenance';
 import {
@@ -11,9 +12,12 @@ import {
 } from '@/features/maintenance/schemas/maintenanceSchema';
 import { maintenanceService } from '@/features/maintenance/services/maintenanceService';
 
-/** `id` é o aquário pré-selecionado; o formulário permite trocar. */
+/** `id` é o aquário pré-selecionado; `equipment` (opcional) pré-vincula um equipamento. */
 export default function CreateMaintenanceScreen() {
-  const { id: aquariumId } = useLocalSearchParams<{ id: string }>();
+  const { id: aquariumId, equipment: equipmentId } = useLocalSearchParams<{
+    id: string;
+    equipment?: string;
+  }>();
   const db = useSQLiteContext();
   const { data, loading, error, reload } = useMaintenanceFormData(null);
 
@@ -43,11 +47,19 @@ export default function CreateMaintenanceScreen() {
     );
   }
 
+  const presetEquipment = data.equipment.find((item) => item.id === equipmentId);
+
   return (
     <Screen>
       <MaintenanceForm
         aquariums={data.aquariums}
-        defaultValues={emptyMaintenanceForm(aquariumId)}
+        equipment={data.equipment}
+        defaultValues={emptyMaintenanceForm(
+          aquariumId,
+          presetEquipment
+            ? { equipmentId: presetEquipment.id, category: SUGGESTED_MAINTENANCE[presetEquipment.category] }
+            : undefined,
+        )}
         submitLabel="Criar tarefa"
         onSubmit={handleSubmit}
       />

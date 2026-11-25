@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { equipmentRepository } from '@/database/repositories/equipmentRepository';
 import { maintenanceRepository } from '@/database/repositories/maintenanceRepository';
 import { createId } from '@/utils/id';
 
@@ -24,6 +25,13 @@ async function syncReminder(db: SQLiteDatabase, taskId: string): Promise<void> {
   await cancelReminder(task.notificationId);
   const notificationId = await scheduleReminder(task);
   await maintenanceRepository.setNotificationId(db, taskId, notificationId);
+}
+
+/** Um equipamento só pode ser vinculado a tarefas do próprio aquário. */
+async function sanitizeEquipment(db: SQLiteDatabase, input: MaintenanceInput): Promise<MaintenanceInput> {
+  if (!input.equipmentId) return input;
+  const equipment = await equipmentRepository.findById(db, input.equipmentId);
+  return equipment?.aquariumId === input.aquariumId ? input : { ...input, equipmentId: null };
 }
 
 export const maintenanceService = {
@@ -52,14 +60,14 @@ export const maintenanceService = {
 
   async create(db: SQLiteDatabase, input: MaintenanceInput): Promise<string> {
     const id = createId();
-    await maintenanceRepository.insert(db, id, input, new Date().toISOString());
+    await maintenanceRepository.insert(db, id, await sanitizeEquipment(db, input), new Date().toISOString());
     await syncReminder(db, id);
     return id;
   },
 
   /** Editar a data redefine a âncora da recorrência. */
   async update(db: SQLiteDatabase, id: string, input: MaintenanceInput): Promise<void> {
-    await maintenanceRepository.update(db, id, input, new Date().toISOString());
+    await maintenanceRepository.update(db, id, await sanitizeEquipment(db, input), new Date().toISOString());
     await syncReminder(db, id);
   },
 

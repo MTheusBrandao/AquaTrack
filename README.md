@@ -8,6 +8,7 @@ Aplicativo mobile para gerenciamento e monitoramento de aquários (água doce, s
 
 - Navegação com 5 abas (Início, Aquários, Monitorar, Manutenção, Perfil).
 - Dashboard com dados reais: totais (aquários, parâmetros em atenção, tarefas atrasadas), atalhos (novo aquário, registrar medição, nova tarefa, adicionar organismo), parâmetros fora da faixa, manutenções atrasadas e próximas (concluíveis ali mesmo), últimas medições e resumo de cada aquário.
+- Equipamentos: cadastrar filtro, aquecedor, iluminação, bomba, skimmer, CO₂ e outros em cada aquário (marca, modelo, potência, data de instalação) e vincular tarefas de manutenção a eles, inclusive criando a tarefa a partir do equipamento.
 - Calculadoras (Perfil → Calculadoras): litros de uma troca parcial, porcentagem de troca para baixar um parâmetro até um alvo, conversões (°dH ↔ ppm, dKH → meq/L, °C → °F, salinidade ↔ densidade), dosagem genérica por concentração e volume pelas medidas, usando o volume de um aquário cadastrado.
 - Backup: exportar todos os dados para um arquivo JSON (folha de compartilhamento do iOS/Android) e restaurar a partir dele, com validação e confirmação. A restauração é atômica: um arquivo inválido não altera nada. Fotos não entram no backup.
 - Dados de exemplo: dois aquários marcados como “Exemplo”, com um mês de medições, organismos e manutenções. Carregados pelo Perfil (ou pelo dashboard vazio) e removíveis sem afetar os dados do usuário.
@@ -64,7 +65,7 @@ npx expo-doctor      # compatibilidade de dependências
 npm test             # testes (Node 22.6+)
 ```
 
-Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, backup e restauração, calculadoras, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
+Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, backup e restauração, calculadoras, equipamentos, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
 
 ## Arquitetura
 
@@ -97,6 +98,7 @@ src/
 │   ├── maintenance/            # + utils/recurrence, services/reminderScheduler
 │   ├── dashboard/              # agregação dos módulos para a tela inicial
 │   ├── backup/                 # exportação/restauração em JSON
+│   ├── equipment/              # equipamentos e vínculo com manutenções
 │   ├── calculators/            # funções puras de cálculo + cartões da tela /tools
 │   └── demo/                   # carga e remoção dos dados de exemplo
 ├── database/
@@ -112,7 +114,7 @@ tests/                          # testes em Node (npm test) + stubs dos módulos
 
 Fluxo de dados: **tela → hook da feature → service → repository → SQLite**. Telas não contêm SQL; services concentram regras (ex.: copiar/remover a foto, transação ao criar espécie manual).
 
-## Modelo de dados (schema v4)
+## Modelo de dados (schema v5)
 
 | Tabela | Destaques |
 |---|---|
@@ -122,7 +124,8 @@ Fluxo de dados: **tela → hook da feature → service → repository → SQLite
 | `parameter_types` | 11 parâmetros (7 gerais + salinidade, cálcio, magnésio e fosfato da migration 4), unidade e casas decimais |
 | `parameter_references` | faixa geral por parâmetro **e tipo de água**; a existência da linha define se o parâmetro se aplica (ex.: GH não aparece em marinho); min/max nulos = sem faixa geral |
 | `parameter_records` | uma linha por parâmetro medido; ausência de linha = não medido (zero é gravado como 0) |
-| `maintenance_tasks` | definição da tarefa, `starts_at` (âncora da recorrência) e `scheduled_at` (próxima execução) |
+| `maintenance_tasks` | definição da tarefa, `starts_at` (âncora da recorrência), `scheduled_at` (próxima execução) e `equipment_id` opcional (`ON DELETE SET NULL`) |
+| `equipment` | equipamentos por aquário (cascata ao excluir o aquário); `power_watts > 0` |
 | `maintenance_logs` | cada conclusão, com título copiado; sobrevive à exclusão da tarefa (`ON DELETE SET NULL`) |
 
 - `PRAGMA foreign_keys = ON` em toda abertura (o SQLite vem com ele desligado).
@@ -160,6 +163,7 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 - **Lembretes**: uma notificação local por tarefa, para a próxima execução, reagendada a cada conclusão/edição. A permissão é pedida só ao salvar a primeira tarefa com lembrete. Notificações locais funcionam no Expo Go; falhas de notificação nunca impedem salvar a tarefa.
 - **Dados de exemplo pendem de aquários marcados** (`is_demo`): remover é só apagar esses aquários, e a cascata leva o resto. Nada fictício fica misturado com dados reais, e os lembretes de exemplo vêm desligados.
 - **Backup em JSON, substituindo tudo**: mesclar dois conjuntos de dados geraria conflitos difíceis de explicar ao usuário. O arquivo traz `schemaVersion`; colunas ausentes (backup de versão anterior) recebem o padrão do schema atual e versões mais novas são recusadas. Nomes de tabela/coluna vêm de uma lista fixa no código, nunca do arquivo. Fotos e ids de notificação são específicos do aparelho e não são restaurados.
+- **Equipamento preso ao aquário**: editar não muda o aquário do equipamento, e o serviço recusa vincular uma tarefa a equipamento de outro aquário. Excluir o equipamento mantém as tarefas, só desfaz o vínculo.
 - **Calculadoras genéricas, sem dosagem por produto**: a dosagem usa só a concentração informada pelo usuário (C₁·V₁ = C₂·V₂). Receitas por marca comercial dariam orientação errada assim que o produto mudasse.
 - **Tema somente claro** (`userInterfaceStyle: light`) e **fontes do sistema**.
 
@@ -178,4 +182,4 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 
 ## Funcionalidades futuras
 
-Faixas por espécie, alcalinidade em outras unidades (meq/L), sensores IoT, sincronização em nuvem/Supabase, autenticação, compartilhamento de aquários, compatibilidade entre espécies, recomendações, catálogo ampliado, controle de equipamentos.
+Faixas por espécie, alcalinidade em outras unidades (meq/L), sensores IoT, sincronização em nuvem/Supabase, autenticação, compartilhamento de aquários, compatibilidade entre espécies, recomendações, catálogo ampliado, vida útil de equipamentos e consumo de energia.

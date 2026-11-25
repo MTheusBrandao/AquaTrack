@@ -125,6 +125,7 @@ export default function MaintenanceDetailsScreen() {
         <Badge label={MAINTENANCE_CATEGORY_LABELS[task.category]} />
         <View style={styles.info}>
           <InfoRow label="Aquário" value={task.aquariumName} />
+          {task.equipmentName ? <InfoRow label="Equipamento" value={task.equipmentName} /> : null}
           <InfoRow label="Repetição" value={FREQUENCY_LABELS[task.frequency]} />
           {task.completedAt ? (
             <InfoRow label="Concluída em" value={formatDateTime(task.completedAt)} />

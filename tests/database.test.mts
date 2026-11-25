@@ -22,7 +22,7 @@ const db = {
 
 await initializeDatabase(db);
 await initializeDatabase(db); // idempotente: não deve reaplicar a migration
-assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 4);
+assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 5);
 assert.equal((raw.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }).foreign_keys, 1);
 
 const fresh = await speciesRepository.listForWaterType(db, 'freshwater');

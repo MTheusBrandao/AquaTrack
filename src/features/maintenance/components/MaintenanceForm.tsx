@@ -20,13 +20,20 @@ import {
 
 type MaintenanceFormProps = {
   aquariums: { id: string; name: string }[];
+  equipment: { id: string; aquariumId: string; name: string }[];
   defaultValues: MaintenanceFormValues;
   submitLabel: string;
   onSubmit: (values: MaintenanceFormOutput) => Promise<void>;
 };
 
-export function MaintenanceForm({ aquariums, defaultValues, submitLabel, onSubmit }: MaintenanceFormProps) {
-  const { control, handleSubmit, formState } = useForm<
+export function MaintenanceForm({
+  aquariums,
+  equipment,
+  defaultValues,
+  submitLabel,
+  onSubmit,
+}: MaintenanceFormProps) {
+  const { control, handleSubmit, formState, setValue } = useForm<
     MaintenanceFormValues,
     unknown,
     MaintenanceFormOutput
@@ -35,6 +42,8 @@ export function MaintenanceForm({ aquariums, defaultValues, submitLabel, onSubmi
     defaultValues,
   });
   const category = useWatch({ control, name: 'category' });
+  const aquariumId = useWatch({ control, name: 'aquariumId' });
+  const aquariumEquipment = equipment.filter((item) => item.aquariumId === aquariumId);
 
   return (
     <View style={styles.form}>
@@ -51,7 +60,11 @@ export function MaintenanceForm({ aquariums, defaultValues, submitLabel, onSubmi
                       key={aquarium.id}
                       label={aquarium.name}
                       selected={field.value === aquarium.id}
-                      onPress={() => field.onChange(aquarium.id)}
+                      onPress={() => {
+                        // O equipamento pertence ao aquário: trocar o aquário desfaz o vínculo.
+                        if (aquarium.id !== field.value) setValue('equipmentId', null);
+                        field.onChange(aquarium.id);
+                      }}
                     />
                   ))}
                 </View>
@@ -78,6 +91,28 @@ export function MaintenanceForm({ aquariums, defaultValues, submitLabel, onSubmi
             </Field>
           )}
         />
+
+        {aquariumEquipment.length ? (
+          <Controller
+            control={control}
+            name="equipmentId"
+            render={({ field }) => (
+              <Field label="Equipamento" optional>
+                <View style={styles.chips}>
+                  <Chip label="Nenhum" selected={field.value === null} onPress={() => field.onChange(null)} />
+                  {aquariumEquipment.map((item) => (
+                    <Chip
+                      key={item.id}
+                      label={item.name}
+                      selected={field.value === item.id}
+                      onPress={() => field.onChange(item.id)}
+                    />
+                  ))}
+                </View>
+              </Field>
+            )}
+          />
+        ) : null}
 
         <FormTextField
           control={control}

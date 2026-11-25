@@ -21,6 +21,8 @@ type TaskRow = {
   completed_at: string | null;
   reminder_enabled: number;
   notification_id: string | null;
+  equipment_id: string | null;
+  equipment_name: string | null;
 };
 
 type LogRow = {
@@ -48,6 +50,8 @@ function toTask(row: TaskRow): MaintenanceTask {
     completedAt: row.completed_at,
     reminderEnabled: row.reminder_enabled === 1,
     notificationId: row.notification_id,
+    equipmentId: row.equipment_id,
+    equipmentName: row.equipment_name,
   };
 }
 
@@ -65,9 +69,10 @@ function toLog(row: LogRow): MaintenanceLog {
 }
 
 const TASK_SELECT = `
-  SELECT t.*, a.name AS aquarium_name
+  SELECT t.*, a.name AS aquarium_name, e.name AS equipment_name
   FROM maintenance_tasks t
-  JOIN aquariums a ON a.id = t.aquarium_id`;
+  JOIN aquariums a ON a.id = t.aquarium_id
+  LEFT JOIN equipment e ON e.id = t.equipment_id`;
 
 export const maintenanceRepository = {
   /** Tarefas ainda não concluídas, da mais próxima para a mais distante. */
@@ -87,6 +92,16 @@ export const maintenanceRepository = {
     return row ? toTask(row) : null;
   },
 
+  async listByEquipment(db: SQLiteDatabase, equipmentId: string): Promise<MaintenanceTask[]> {
+    const rows = await db.getAllAsync<TaskRow>(
+      `${TASK_SELECT}
+       WHERE t.equipment_id = ? AND t.completed_at IS NULL
+       ORDER BY t.scheduled_at ASC`,
+      equipmentId,
+    );
+    return rows.map(toTask);
+  },
+
   async listNotificationIds(db: SQLiteDatabase, aquariumId: string): Promise<string[]> {
     const rows = await db.getAllAsync<{ notification_id: string }>(
       'SELECT notification_id FROM maintenance_tasks WHERE aquarium_id = ? AND notification_id IS NOT NULL',
@@ -99,8 +114,8 @@ export const maintenanceRepository = {
     await db.runAsync(
       `INSERT INTO maintenance_tasks (
          id, aquarium_id, title, category, description, frequency, starts_at, scheduled_at,
-         reminder_enabled, created_at, updated_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         reminder_enabled, equipment_id, created_at, updated_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       id,
       input.aquariumId,
       input.title,
@@ -110,6 +125,7 @@ export const maintenanceRepository = {
       input.scheduledAt,
       input.scheduledAt,
       input.reminderEnabled ? 1 : 0,
+      input.equipmentId ?? null,
       now,
       now,
     );
@@ -119,7 +135,7 @@ export const maintenanceRepository = {
     await db.runAsync(
       `UPDATE maintenance_tasks SET
          aquarium_id = ?, title = ?, category = ?, description = ?, frequency = ?,
-         starts_at = ?, scheduled_at = ?, reminder_enabled = ?, updated_at = ?
+         starts_at = ?, scheduled_at = ?, reminder_enabled = ?, equipment_id = ?, updated_at = ?
        WHERE id = ?`,
       input.aquariumId,
       input.title,
@@ -129,6 +145,7 @@ export const maintenanceRepository = {
       input.scheduledAt,
       input.scheduledAt,
       input.reminderEnabled ? 1 : 0,
+      input.equipmentId ?? null,
       now,
       id,
     );
