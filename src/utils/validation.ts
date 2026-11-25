@@ -7,7 +7,7 @@ type Range = { min: number; max: number; unit: string };
 const INVALID_NUMBER = 'Informe um número válido.';
 
 function rangeMessage({ min, max, unit }: Range) {
-  return `Use um valor entre ${String(min).replace('.', ',')} e ${max} ${unit}.`;
+  return `Use um valor entre ${String(min).replace('.', ',')} e ${`${max} ${unit}`.trim()}.`;
 }
 
 /** Campo numérico obrigatório digitado como texto (aceita vírgula). */

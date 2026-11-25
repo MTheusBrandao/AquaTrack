@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { aquariumRepository } from '@/database/repositories/aquariumRepository';
 import { speciesRepository } from '@/database/repositories/speciesRepository';
+import { maintenanceService } from '@/features/maintenance/services/maintenanceService';
 import type { AquariumOrganism } from '@/features/species/types/species';
 import { createId } from '@/utils/id';
 
@@ -65,6 +66,8 @@ export const aquariumService = {
   async remove(db: SQLiteDatabase, id: string): Promise<void> {
     const current = await aquariumRepository.findById(db, id);
     if (!current) return;
+    await maintenanceService.cancelRemindersForAquarium(db, id);
+    // Medições, organismos, tarefas e histórico de manutenção saem em cascata.
     await aquariumRepository.remove(db, id);
     if (current.imageUri) deleteStoredImage(current.imageUri);
   },

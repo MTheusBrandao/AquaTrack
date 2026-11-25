@@ -40,6 +40,31 @@ export function formatLocalDate(value: string): string {
   });
 }
 
+/** Instante ISO → "24 de nov. de 2026, 14:30" no fuso do aparelho. */
+export function formatDateTime(isoInstant: string): string {
+  return new Date(isoInstant).toLocaleString(LOCALE, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function formatShortDate(isoInstant: string): string {
+  return new Date(isoInstant).toLocaleDateString(LOCALE, { day: '2-digit', month: 'short' });
+}
+
+/** "hoje", "ontem", "há 3 dias", "em 2 dias" — por dias de calendário locais. */
+export function formatRelativeDay(isoInstant: string, now = new Date()): string {
+  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diff = Math.round((startOf(new Date(isoInstant)) - startOf(now)) / 86_400_000);
+  if (diff === 0) return 'hoje';
+  if (diff === -1) return 'ontem';
+  if (diff === 1) return 'amanhã';
+  return diff < 0 ? `há ${-diff} dias` : `em ${diff} dias`;
+}
+
 export function todayLocalDateString(): string {
   return toLocalDateString(new Date());
 }

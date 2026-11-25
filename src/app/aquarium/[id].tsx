@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { Pencil, Plus, Sprout, Trash2 } from 'lucide-react-native';
+import { CalendarPlus, ChartLine, Pencil, Plus, Sprout, Trash2 } from 'lucide-react-native';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import {
@@ -67,9 +67,8 @@ export default function AquariumDetailsScreen() {
   }
 
   function confirmDelete() {
-    const organismsNote = organisms.length
-      ? ` Os ${organisms.length} registros de organismos também serão excluídos.`
-      : '';
+    const organismsNote =
+      ' Organismos, medições, tarefas e histórico de manutenção deste aquário também serão excluídos.';
     Alert.alert('Excluir aquário?', `“${aquarium.name}” será removido permanentemente.${organismsNote}`, [
       { text: 'Cancelar', style: 'cancel' },
       {
@@ -126,6 +125,27 @@ export default function AquariumDetailsScreen() {
         </View>
         {aquarium.description ? <AppText color="textSecondary">{aquarium.description}</AppText> : null}
       </Card>
+
+      <View style={styles.shortcuts}>
+        <View style={styles.flex}>
+          <Button
+            label="Parâmetros"
+            variant="secondary"
+            size="small"
+            icon={<ChartLine size={sizes.iconSm} color={colors.primary} />}
+            onPress={() => router.push({ pathname: '/monitoring/history/[id]', params: { id } })}
+          />
+        </View>
+        <View style={styles.flex}>
+          <Button
+            label="Nova tarefa"
+            variant="secondary"
+            size="small"
+            icon={<CalendarPlus size={sizes.iconSm} color={colors.primary} />}
+            onPress={() => router.push({ pathname: '/maintenance/create/[id]', params: { id } })}
+          />
+        </View>
+      </View>
 
       <View style={styles.sectionHeader}>
         <AppText variant="subtitle">Fauna e flora</AppText>
@@ -189,6 +209,10 @@ const styles = StyleSheet.create({
   infoItem: {
     width: '50%',
     gap: spacing.xxs,
+  },
+  shortcuts: {
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
   sectionHeader: {
     flexDirection: 'row',

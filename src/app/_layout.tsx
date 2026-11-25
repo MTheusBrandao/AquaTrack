@@ -5,7 +5,10 @@ import { Suspense } from 'react';
 
 import { LoadingState } from '@/components/ui';
 import { DATABASE_NAME, initializeDatabase } from '@/database/database';
+import { configureNotifications } from '@/features/maintenance/services/reminderScheduler';
 import { colors } from '@/theme';
+
+configureNotifications();
 
 export default function RootLayout() {
   return (
@@ -27,6 +30,11 @@ export default function RootLayout() {
           <Stack.Screen name="aquarium/edit/[id]" options={{ title: 'Editar aquário' }} />
           <Stack.Screen name="aquarium/add-species/[id]" options={{ title: 'Adicionar organismo' }} />
           <Stack.Screen name="aquarium/species/[id]" options={{ title: 'Organismo' }} />
+          <Stack.Screen name="monitoring/add-measurement/[id]" options={{ title: 'Registrar medição' }} />
+          <Stack.Screen name="monitoring/history/[id]" options={{ title: 'Histórico' }} />
+          <Stack.Screen name="maintenance/create/[id]" options={{ title: 'Nova tarefa' }} />
+          <Stack.Screen name="maintenance/details/[id]" options={{ title: 'Tarefa' }} />
+          <Stack.Screen name="maintenance/edit/[id]" options={{ title: 'Editar tarefa' }} />
         </Stack>
       </SQLiteProvider>
     </Suspense>

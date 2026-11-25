@@ -62,6 +62,9 @@ export const sizes = {
   iconMd: 22,
   iconLg: 32,
   iconBadge: 36,
+  statusDot: 6,
+  chartHeight: 200,
+  parameterCardMinHeight: 132,
   emptyStateIcon: 64,
   tabBarHeight: 64,
 } as const;
