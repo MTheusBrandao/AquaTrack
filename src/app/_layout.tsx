@@ -35,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="maintenance/create/[id]" options={{ title: 'Nova tarefa' }} />
           <Stack.Screen name="maintenance/details/[id]" options={{ title: 'Tarefa' }} />
           <Stack.Screen name="maintenance/edit/[id]" options={{ title: 'Editar tarefa' }} />
+          <Stack.Screen name="tools" options={{ title: 'Calculadoras' }} />
         </Stack>
       </SQLiteProvider>
     </Suspense>

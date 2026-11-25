@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
-import { FlaskConical, Trash2 } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Calculator, FlaskConical, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
@@ -47,6 +48,20 @@ export default function ProfileScreen() {
 
   return (
     <Screen title="Perfil" subtitle="Configurações e preferências">
+      <Card style={styles.card}>
+        <AppText variant="subtitle">Calculadoras</AppText>
+        <AppText color="textSecondary">
+          Troca parcial de água, conversões de dureza, temperatura e salinidade, dosagem por concentração e volume
+          do aquário.
+        </AppText>
+        <Button
+          label="Abrir calculadoras"
+          variant="secondary"
+          icon={<Calculator size={sizes.iconSm} color={colors.primary} />}
+          onPress={() => router.push('/tools')}
+        />
+      </Card>
+
       <BackupCard onRestored={demo.reload} />
 
       <Card style={styles.card}>

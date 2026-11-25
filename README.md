@@ -8,6 +8,7 @@ Aplicativo mobile para gerenciamento e monitoramento de aquários (água doce, s
 
 - Navegação com 5 abas (Início, Aquários, Monitorar, Manutenção, Perfil).
 - Dashboard com dados reais: totais (aquários, parâmetros em atenção, tarefas atrasadas), atalhos (novo aquário, registrar medição, nova tarefa, adicionar organismo), parâmetros fora da faixa, manutenções atrasadas e próximas (concluíveis ali mesmo), últimas medições e resumo de cada aquário.
+- Calculadoras (Perfil → Calculadoras): litros de uma troca parcial, porcentagem de troca para baixar um parâmetro até um alvo, conversões (°dH ↔ ppm, dKH → meq/L, °C → °F, salinidade ↔ densidade), dosagem genérica por concentração e volume pelas medidas, usando o volume de um aquário cadastrado.
 - Backup: exportar todos os dados para um arquivo JSON (folha de compartilhamento do iOS/Android) e restaurar a partir dele, com validação e confirmação. A restauração é atômica: um arquivo inválido não altera nada. Fotos não entram no backup.
 - Dados de exemplo: dois aquários marcados como “Exemplo”, com um mês de medições, organismos e manutenções. Carregados pelo Perfil (ou pelo dashboard vazio) e removíveis sem afetar os dados do usuário.
 - Aquários: criar, editar, excluir (com confirmação), listar e ver detalhes. Campos: nome, tipo de água, volume, dimensões, data de montagem, temperatura desejada, descrição e foto opcional.
@@ -63,7 +64,7 @@ npx expo-doctor      # compatibilidade de dependências
 npm test             # testes (Node 22.6+)
 ```
 
-Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, backup e restauração, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
+Os testes rodam as migrations, repositories e services reais contra o SQLite embutido do Node (`node:sqlite`), sem emulador. Módulos nativos do Expo (notificações, arquivos, crypto) são substituídos por stubs em `tests/stubs`. Cobertura: migrations (incluindo atualização de banco existente), CRUD e cascatas, backup e restauração, calculadoras, recorrência por calendário, status das faixas, validação, agendamento/cancelamento de lembretes, dados de exemplo e dashboard.
 
 ## Arquitetura
 
@@ -96,6 +97,7 @@ src/
 │   ├── maintenance/            # + utils/recurrence, services/reminderScheduler
 │   ├── dashboard/              # agregação dos módulos para a tela inicial
 │   ├── backup/                 # exportação/restauração em JSON
+│   ├── calculators/            # funções puras de cálculo + cartões da tela /tools
 │   └── demo/                   # carga e remoção dos dados de exemplo
 ├── database/
 │   ├── database.ts             # abertura, PRAGMAs e execução das migrations
@@ -158,6 +160,7 @@ Todos os valores visuais ficam em `src/theme`. Nenhuma tela deve usar cor, espa�
 - **Lembretes**: uma notificação local por tarefa, para a próxima execução, reagendada a cada conclusão/edição. A permissão é pedida só ao salvar a primeira tarefa com lembrete. Notificações locais funcionam no Expo Go; falhas de notificação nunca impedem salvar a tarefa.
 - **Dados de exemplo pendem de aquários marcados** (`is_demo`): remover é só apagar esses aquários, e a cascata leva o resto. Nada fictício fica misturado com dados reais, e os lembretes de exemplo vêm desligados.
 - **Backup em JSON, substituindo tudo**: mesclar dois conjuntos de dados geraria conflitos difíceis de explicar ao usuário. O arquivo traz `schemaVersion`; colunas ausentes (backup de versão anterior) recebem o padrão do schema atual e versões mais novas são recusadas. Nomes de tabela/coluna vêm de uma lista fixa no código, nunca do arquivo. Fotos e ids de notificação são específicos do aparelho e não são restaurados.
+- **Calculadoras genéricas, sem dosagem por produto**: a dosagem usa só a concentração informada pelo usuário (C₁·V₁ = C₂·V₂). Receitas por marca comercial dariam orientação errada assim que o produto mudasse.
 - **Tema somente claro** (`userInterfaceStyle: light`) e **fontes do sistema**.
 
 ## Roadmap
