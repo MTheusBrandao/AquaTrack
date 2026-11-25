@@ -1,38 +1,57 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
-import { borderWidth, colors, radius, sizes, spacing } from '@/theme';
+import { borderWidth, colors, radius, sizes, spacing, type ColorToken } from '@/theme';
 
 import { AppText } from './AppText';
 
-type ButtonVariant = 'primary' | 'secondary';
+type ButtonVariant = 'primary' | 'secondary' | 'danger';
+type ButtonSize = 'regular' | 'small';
 
 type ButtonProps = {
   label: string;
   onPress: () => void;
   variant?: ButtonVariant;
+  size?: ButtonSize;
   icon?: ReactNode;
   disabled?: boolean;
+  loading?: boolean;
 };
 
-export function Button({ label, onPress, variant = 'primary', icon, disabled }: ButtonProps) {
-  const isPrimary = variant === 'primary';
+const textColor: Record<ButtonVariant, ColorToken> = {
+  primary: 'onPrimary',
+  secondary: 'primary',
+  danger: 'critical',
+};
+
+export function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  size = 'regular',
+  icon,
+  disabled,
+  loading,
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      disabled={disabled}
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        isPrimary ? styles.primary : styles.secondary,
+        size === 'small' && styles.small,
+        styles[variant],
         pressed && styles.pressed,
-        disabled && styles.disabled,
+        isDisabled && styles.disabled,
       ]}>
       <View style={styles.content}>
-        {icon}
-        <AppText variant="label" color={isPrimary ? 'onPrimary' : 'primary'}>
+        {loading ? <ActivityIndicator size="small" color={colors[textColor[variant]]} /> : icon}
+        <AppText variant="label" color={textColor[variant]}>
           {label}
         </AppText>
       </View>
@@ -48,6 +67,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  small: {
+    minHeight: sizes.buttonHeightSmall,
+    paddingHorizontal: spacing.md,
+  },
   primary: {
     backgroundColor: colors.primary,
   },
@@ -55,6 +78,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: borderWidth.hairline,
     borderColor: colors.primary,
+  },
+  danger: {
+    backgroundColor: colors.surface,
+    borderWidth: borderWidth.hairline,
+    borderColor: colors.critical,
   },
   content: {
     flexDirection: 'row',

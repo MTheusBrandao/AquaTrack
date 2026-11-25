@@ -54,9 +54,14 @@ export const elevation = {
 
 export const sizes = {
   buttonHeight: 48,
+  buttonHeightSmall: 36,
+  inputHeight: 48,
+  thumbnail: 64,
+  heroImage: 200,
   iconSm: 18,
   iconMd: 22,
   iconLg: 32,
+  iconBadge: 36,
   emptyStateIcon: 64,
   tabBarHeight: 64,
 } as const;
