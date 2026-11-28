@@ -48,6 +48,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "species-photos": "node scripts/species-photos.mjs",
     "test": "node --no-warnings --import ./tests/ts-resolve.mjs --test \"tests/*.test.mts\""
   },
   "private": true

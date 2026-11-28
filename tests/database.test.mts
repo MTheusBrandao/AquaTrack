@@ -22,7 +22,7 @@ const db = {
 
 await initializeDatabase(db);
 await initializeDatabase(db); // idempotente: não deve reaplicar a migration
-assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 5);
+assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 6);
 assert.equal((raw.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number }).foreign_keys, 1);
 
 const fresh = await speciesRepository.listForWaterType(db, 'freshwater');
@@ -33,14 +33,15 @@ assert.ok(fresh.every((s: { waterType: string }) => s.waterType === 'freshwater'
 const now = new Date().toISOString();
 const input = { name: 'Plantado', type: 'freshwater', volume: 120, length: 80, width: 30, height: 50, setupDate: '2026-01-10', targetTemperature: 26, description: null, imageUri: null };
 await aquariumRepository.insert(db, 'aq1', input, now);
-await speciesRepository.insertOrganism(db, 'o1', 'aq1', 'cat-neon-tetra', { quantity: 10, addedAt: null, notes: null }, now);
+await speciesRepository.insertOrganism(db, 'o1', 'aq1', 'cat-neon-tetra', { quantity: 10, addedAt: null, notes: null, imageUri: null }, now);
 await speciesRepository.insertCustom(db, 'sp-custom', { commonName: 'Tetra-limão', scientificName: null, category: 'fish', waterType: 'freshwater' }, now);
-await speciesRepository.insertOrganism(db, 'o2', 'aq1', 'sp-custom', { quantity: 5, addedAt: '2026-02-01', notes: 'ok' }, now);
+await speciesRepository.insertOrganism(db, 'o2', 'aq1', 'sp-custom', { quantity: 5, addedAt: '2026-02-01', notes: 'ok', imageUri: 'aquarium-images/o2.jpg' }, now);
 
 const list = await aquariumRepository.listWithStats(db);
 assert.equal(list[0].speciesCount, 2);
 assert.equal((await speciesRepository.listOrganisms(db, 'aq1')).length, 2);
 assert.equal((await speciesRepository.findOrganism(db, 'o2')).species.isCustom, true);
+assert.equal((await speciesRepository.findOrganism(db, 'o2')).imageUri, 'aquarium-images/o2.jpg');
 
 await aquariumRepository.update(db, 'aq1', { ...input, name: 'Plantado 2', length: null }, now);
 const updated = await aquariumRepository.findById(db, 'aq1');
@@ -49,7 +50,7 @@ assert.equal(updated.length, null);
 
 // Constraints
 await assert.rejects(() => aquariumRepository.insert(db, 'bad', { ...input, volume: 0 }, now));
-await assert.rejects(() => speciesRepository.insertOrganism(db, 'o3', 'nope', 'cat-betta', { quantity: 1, addedAt: null, notes: null }, now), /FOREIGN KEY/);
+await assert.rejects(() => speciesRepository.insertOrganism(db, 'o3', 'nope', 'cat-betta', { quantity: 1, addedAt: null, notes: null, imageUri: null }, now), /FOREIGN KEY/);
 
 // Cascade
 await aquariumRepository.remove(db, 'aq1');

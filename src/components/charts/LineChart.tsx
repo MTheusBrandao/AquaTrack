@@ -97,6 +97,12 @@ export function LineChart({
   const bandTop = scaleY(referenceMax ?? yMax);
   const bandBottom = scaleY(referenceMin ?? yMin);
   const hasBand = referenceMin !== null || referenceMax !== null;
+  // Linhas tracejadas só nos limites que existem. Com mínimo igual ao máximo (ex.: amônia 0 a 0)
+  // as duas cairiam no mesmo y: desenhamos uma só, e a chave é o limite, nunca a coordenada.
+  const bandEdges = [
+    referenceMax !== null ? { id: 'max', y: bandTop } : null,
+    referenceMin !== null && referenceMin !== referenceMax ? { id: 'min', y: bandBottom } : null,
+  ].filter((edge): edge is { id: string; y: number } => edge !== null);
   const labelStyle = {
     fontSize: typography.overline.fontSize,
     fontFamily: fontFamilyFor('600'),
@@ -128,9 +134,9 @@ export function LineChart({
                 rx={8}
                 fill={colors.secondary}
               />
-              {[bandTop, bandBottom].map((y) => (
+              {bandEdges.map(({ id, y }) => (
                 <Line
-                  key={y}
+                  key={id}
                   x1={PADDING.left}
                   x2={PADDING.left + plotWidth}
                   y1={y}

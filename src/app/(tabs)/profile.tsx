@@ -1,9 +1,9 @@
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 import { router } from 'expo-router';
-import { Calculator, FlaskConical, Trash2 } from 'lucide-react-native';
+import { Calculator, ChevronRight, FlaskConical, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Button, Card, Screen } from '@/components/ui';
 import { BackupCard } from '@/features/backup/components/BackupCard';
@@ -102,6 +102,11 @@ export default function ProfileScreen() {
           espécie.
         </AppText>
         <View style={styles.divider} />
+        <Pressable accessibilityRole="button" onPress={() => router.push('/credits')} style={styles.row}>
+          <AppText color="textSecondary">Créditos das imagens</AppText>
+          <ChevronRight size={sizes.iconSm} color={colors.textSecondary} />
+        </Pressable>
+        <View style={styles.divider} />
         <View style={styles.row}>
           <AppText color="textSecondary">Versão</AppText>
           <AppText variant="label">{version}</AppText>
@@ -123,5 +128,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: 32,
   },
 });

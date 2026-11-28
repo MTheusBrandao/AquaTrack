@@ -35,7 +35,7 @@ async function setup() {
 
 test('migrations chegam à versão mais recente', async () => {
   const { raw } = await setup();
-  assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 5);
+  assert.equal((raw.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, 6);
 });
 
 test('medição grava só os parâmetros preenchidos', async () => {

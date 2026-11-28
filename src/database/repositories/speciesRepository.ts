@@ -25,6 +25,7 @@ type OrganismRow = {
   quantity: number;
   added_at: string | null;
   notes: string | null;
+  organism_image_uri: string | null;
 } & SpeciesRow;
 
 function toSpecies(row: SpeciesRow): Species {
@@ -46,6 +47,7 @@ function toOrganism(row: OrganismRow): AquariumOrganism {
     quantity: row.quantity,
     addedAt: row.added_at,
     notes: row.notes,
+    imageUri: row.organism_image_uri,
     species: toSpecies(row),
   };
 }
@@ -53,6 +55,7 @@ function toOrganism(row: OrganismRow): AquariumOrganism {
 const ORGANISM_SELECT = `
   SELECT
     o.id AS organism_id, o.aquarium_id, o.quantity, o.added_at, o.notes,
+    o.image_uri AS organism_image_uri,
     s.id, s.common_name, s.scientific_name, s.category, s.water_type, s.description, s.is_custom
   FROM aquarium_species o
   JOIN species s ON s.id = o.species_id`;
@@ -111,26 +114,37 @@ export const speciesRepository = {
     now: string,
   ): Promise<void> {
     await db.runAsync(
-      `INSERT INTO aquarium_species (id, aquarium_id, species_id, quantity, added_at, notes, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO aquarium_species (id, aquarium_id, species_id, quantity, added_at, notes, image_uri, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       id,
       aquariumId,
       speciesId,
       input.quantity,
       input.addedAt,
       input.notes,
+      input.imageUri,
       now,
     );
   },
 
   async updateOrganism(db: SQLiteDatabase, id: string, input: AquariumOrganismInput): Promise<void> {
     await db.runAsync(
-      'UPDATE aquarium_species SET quantity = ?, added_at = ?, notes = ? WHERE id = ?',
+      'UPDATE aquarium_species SET quantity = ?, added_at = ?, notes = ?, image_uri = ? WHERE id = ?',
       input.quantity,
       input.addedAt,
       input.notes,
+      input.imageUri,
       id,
     );
+  },
+
+  /** Fotos dos organismos de um aquário, para limpar os arquivos antes da exclusão em cascata. */
+  async listOrganismImages(db: SQLiteDatabase, aquariumId: string): Promise<string[]> {
+    const rows = await db.getAllAsync<{ image_uri: string }>(
+      'SELECT image_uri FROM aquarium_species WHERE aquarium_id = ? AND image_uri IS NOT NULL',
+      aquariumId,
+    );
+    return rows.map((row) => row.image_uri);
   },
 
   async removeOrganism(db: SQLiteDatabase, id: string): Promise<void> {

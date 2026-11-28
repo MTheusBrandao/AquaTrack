@@ -61,6 +61,7 @@ export default function AddOrganismScreen() {
         quantity: values.quantity,
         addedAt: values.addedAt,
         notes: values.notes,
+        imageUri: values.imageUri,
       });
       router.back();
     } catch (cause) {
@@ -106,6 +107,7 @@ export default function AddOrganismScreen() {
             defaultValues={emptyOrganismForm(step.kind === 'custom' ? step.initialName : undefined)}
             submitLabel="Adicionar ao aquário"
             onSubmit={handleSubmit}
+            species={step.kind === 'selected' ? step.species : null}
           />
         </>
       )}

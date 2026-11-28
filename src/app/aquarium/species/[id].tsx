@@ -1,16 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Trash2 } from 'lucide-react-native';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert } from 'react-native';
 
-import { AppText, Button, Card, ErrorState, LoadingState, Screen } from '@/components/ui';
+import { Button, ErrorState, LoadingState, Screen } from '@/components/ui';
 import { OrganismForm } from '@/features/species/components/OrganismForm';
-import { SpeciesIcon } from '@/features/species/components/SpeciesIcon';
+import { SpeciesHero } from '@/features/species/components/SpeciesHero';
 import { useOrganism } from '@/features/species/hooks/useOrganisms';
 import { organismToForm, type OrganismFormOutput } from '@/features/species/schemas/organismSchema';
 import { organismService } from '@/features/species/services/organismService';
-import { SPECIES_CATEGORY_LABELS } from '@/features/species/types/species';
-import { colors, sizes, spacing } from '@/theme';
+import { colors, sizes } from '@/theme';
 
 /** Detalhes de um organismo do aquário (registro de aquarium_species), com edição e remoção. */
 export default function OrganismScreen() {
@@ -42,6 +41,7 @@ export default function OrganismScreen() {
         quantity: values.quantity,
         addedAt: values.addedAt,
         notes: values.notes,
+        imageUri: values.imageUri,
       });
       router.back();
     } catch (cause) {
@@ -71,27 +71,15 @@ export default function OrganismScreen() {
 
   return (
     <Screen>
-      <Card style={styles.header}>
-        <SpeciesIcon category={species.category} />
-        <View style={styles.flex}>
-          <AppText variant="subtitle">{species.commonName}</AppText>
-          {species.scientificName ? (
-            <AppText color="textSecondary" style={styles.italic}>
-              {species.scientificName}
-            </AppText>
-          ) : null}
-          <AppText variant="caption" color="textSecondary">
-            {SPECIES_CATEGORY_LABELS[species.category]}
-            {species.isCustom ? ' · cadastrada por você' : ''}
-          </AppText>
-        </View>
-      </Card>
+      <SpeciesHero organism={organism} />
 
       <OrganismForm
         key={organism.id}
         defaultValues={organismToForm(organism)}
         submitLabel="Salvar alterações"
         onSubmit={handleSubmit}
+        species={species}
+        compactPhoto
       />
 
       <Button
@@ -104,17 +92,3 @@ export default function OrganismScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  flex: {
-    flex: 1,
-    gap: spacing.xxs,
-  },
-  italic: {
-    fontStyle: 'italic',
-  },
-});

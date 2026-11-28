@@ -73,8 +73,11 @@ export const aquariumService = {
     const current = await aquariumRepository.findById(db, id);
     if (!current) return;
     await maintenanceService.cancelRemindersForAquarium(db, id);
-    // Medições, organismos, tarefas e histórico de manutenção saem em cascata.
+    // Medições, organismos, tarefas e histórico de manutenção saem em cascata;
+    // os arquivos das fotos dos organismos não, então são listados antes.
+    const organismImages = await speciesRepository.listOrganismImages(db, id);
     await aquariumRepository.remove(db, id);
     if (current.imageUri) deleteStoredImage(current.imageUri);
+    organismImages.forEach(deleteStoredImage);
   },
 };

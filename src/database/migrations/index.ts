@@ -5,6 +5,7 @@ import * as monitoringMaintenance from './002_monitoring_maintenance';
 import * as demoFlag from './003_demo_flag';
 import * as marineParameters from './004_marine_parameters';
 import * as equipment from './005_equipment';
+import * as organismPhotos from './006_organism_photos';
 
 type Migration = {
   version: number;
@@ -21,4 +22,5 @@ export const migrations: Migration[] = [
   { version: 3, up: demoFlag.up },
   { version: 4, up: marineParameters.up },
   { version: 5, up: equipment.up },
+  { version: 6, up: organismPhotos.up },
 ];

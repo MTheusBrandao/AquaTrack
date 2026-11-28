@@ -6,7 +6,7 @@ import { AppText, Button, Card, Chip } from '@/components/ui';
 import { borderWidth, colors, fontFamilyFor, radius, sizes, spacing, typography } from '@/theme';
 
 import { SPECIES_CATEGORIES, SPECIES_CATEGORY_LABELS, type Species, type SpeciesCategory } from '../types/species';
-import { SpeciesIcon } from './SpeciesIcon';
+import { OrganismPhoto } from './OrganismPhoto';
 
 function normalize(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -79,7 +79,7 @@ export function SpeciesCatalog({ species, onSelect, onCreateCustom }: SpeciesCat
               accessibilityLabel={`Selecionar ${item.commonName}`}
               onPress={() => onSelect(item)}
               style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-              <SpeciesIcon category={item.category} />
+              <OrganismPhoto imageUri={null} species={item} style={styles.thumb} size={44} />
               <View style={styles.info}>
                 <AppText variant="label">{item.commonName}</AppText>
                 {item.scientificName ? (
@@ -143,6 +143,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  thumb: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.sm,
   },
   info: {
     flex: 1,

@@ -14,6 +14,8 @@ const organismFields = z.object({
     .refine((value) => value >= 1 && value <= 9999, 'Use um valor entre 1 e 9999.'),
   addedAt: optionalPastDate,
   notes: optionalText(300),
+  /** URI da foto própria: caminho salvo no app ou arquivo temporário recém-escolhido. */
+  imageUri: z.string().nullable(),
 });
 
 const customSpeciesSchema = z.object({
@@ -38,6 +40,7 @@ export function emptyOrganismForm(customSpeciesName?: string): OrganismFormValue
     quantity: '1',
     addedAt: null,
     notes: '',
+    imageUri: null,
     customSpecies:
       customSpeciesName === undefined
         ? null
@@ -50,6 +53,7 @@ export function organismToForm(organism: AquariumOrganism): OrganismFormValues {
     quantity: String(organism.quantity),
     addedAt: organism.addedAt,
     notes: organism.notes ?? '',
+    imageUri: organism.imageUri,
     customSpecies: null,
   };
 }

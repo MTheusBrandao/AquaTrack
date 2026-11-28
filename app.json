@@ -34,6 +34,14 @@
         }
       ],
       "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O AquaTrack usa suas fotos para mostrar seus aquários e animais.",
+          "cameraPermission": "O AquaTrack usa a câmera para você fotografar seus aquários e animais.",
+          "microphonePermission": false
+        }
+      ],
       "@react-native-community/datetimepicker",
       "expo-sharing",
       "expo-font"

@@ -64,6 +64,7 @@ export default function RootLayout() {
             <Stack.Screen name="maintenance/details/[id]" options={{ title: 'Tarefa' }} />
             <Stack.Screen name="maintenance/edit/[id]" options={{ title: 'Editar tarefa' }} />
             <Stack.Screen name="tools" options={{ title: 'Calculadoras' }} />
+            <Stack.Screen name="credits" options={{ title: 'Créditos das imagens' }} />
             <Stack.Screen name="equipment/create/[id]" options={{ title: 'Novo equipamento' }} />
             <Stack.Screen name="equipment/[id]" options={{ title: 'Equipamento' }} />
           </Stack>

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 
 import { DateField, Field, FormTextField } from '@/components/forms';
@@ -11,20 +11,32 @@ import {
   type OrganismFormOutput,
   type OrganismFormValues,
 } from '../schemas/organismSchema';
-import { SPECIES_CATEGORIES, SPECIES_CATEGORY_LABELS } from '../types/species';
+import { SPECIES_CATEGORIES, SPECIES_CATEGORY_LABELS, type SpeciesCategory } from '../types/species';
+import { OrganismPhotoPicker } from './OrganismPhotoPicker';
 
 type OrganismFormProps = {
   defaultValues: OrganismFormValues;
   submitLabel: string;
   onSubmit: (values: OrganismFormOutput) => Promise<void>;
+  /** Espécie do catálogo; null quando o usuário está cadastrando uma espécie nova. */
+  species: { id: string; category: SpeciesCategory; commonName: string } | null;
+  /** Foto em miniatura no formulário (a tela já mostra a foto grande). */
+  compactPhoto?: boolean;
 };
 
-export function OrganismForm({ defaultValues, submitLabel, onSubmit }: OrganismFormProps) {
+export function OrganismForm({ defaultValues, submitLabel, onSubmit, species, compactPhoto }: OrganismFormProps) {
   const { control, handleSubmit, formState } = useForm<OrganismFormValues, unknown, OrganismFormOutput>({
     resolver: zodResolver(organismSchema),
     defaultValues,
   });
   const isCustom = defaultValues.customSpecies !== null;
+  const customSpecies = useWatch({ control, name: 'customSpecies' });
+  // Espécie nova ainda não tem id nem foto padrão: a prévia usa a categoria escolhida.
+  const photoSpecies = species ?? {
+    id: '',
+    category: customSpecies?.category ?? 'fish',
+    commonName: customSpecies?.commonName || 'Nova espécie',
+  };
 
   return (
     <View style={styles.form}>
@@ -68,6 +80,23 @@ export function OrganismForm({ defaultValues, submitLabel, onSubmit }: OrganismF
           />
         </Card>
       ) : null}
+
+      <Card style={styles.section}>
+        <Controller
+          control={control}
+          name="imageUri"
+          render={({ field }) => (
+            <Field label="Foto" optional>
+              <OrganismPhotoPicker
+                value={field.value}
+                onChange={field.onChange}
+                species={photoSpecies}
+                compact={compactPhoto}
+              />
+            </Field>
+          )}
+        />
+      </Card>
 
       <Card style={styles.section}>
         <FormTextField

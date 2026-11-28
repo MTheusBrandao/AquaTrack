@@ -1,23 +1,26 @@
 import { router } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
-import { colors, sizes, spacing } from '@/theme';
+import { PressableScale } from '@/components/ui/PressableScale';
+import { colors, radius, sizes, spacing } from '@/theme';
 
 import { SPECIES_CATEGORY_LABELS, type AquariumOrganism } from '../types/species';
-import { SpeciesIcon } from './SpeciesIcon';
+import { OrganismPhoto } from './OrganismPhoto';
+
+const THUMB = 56;
 
 export function OrganismRow({ organism }: { organism: AquariumOrganism }) {
   const { species } = organism;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={`${species.commonName}, ${organism.quantity} unidades`}
       onPress={() => router.push({ pathname: '/aquarium/species/[id]', params: { id: organism.id } })}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-      <SpeciesIcon category={species.category} />
+      style={styles.row}>
+      <OrganismPhoto imageUri={organism.imageUri} species={species} style={styles.thumb} size={THUMB} />
       <View style={styles.info}>
         <AppText variant="label" numberOfLines={1}>
           {species.commonName}
@@ -31,7 +34,7 @@ export function OrganismRow({ organism }: { organism: AquariumOrganism }) {
         ×{organism.quantity}
       </AppText>
       <ChevronRight size={sizes.iconSm} color={colors.textSecondary} />
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -46,7 +49,9 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xxs,
   },
-  pressed: {
-    opacity: 0.7,
+  thumb: {
+    width: THUMB,
+    height: THUMB,
+    borderRadius: radius.md,
   },
 });

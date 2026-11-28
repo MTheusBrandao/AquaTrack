@@ -29,7 +29,7 @@ async function populatedDevice() {
     device.db,
     aquariumId,
     { kind: 'custom', species: { commonName: 'Molinésia', scientificName: null, category: 'fish', waterType: 'brackish' } },
-    { quantity: 3, addedAt: null, notes: null },
+    { quantity: 3, addedAt: null, notes: null, imageUri: 'aquarium-images/molinesia.jpg' },
   );
   await maintenanceService.create(device.db, {
     aquariumId, title: 'TPA', category: 'water_change', description: null, frequency: 'weekly',
@@ -52,6 +52,8 @@ test('backup e restauração em outro aparelho preservam os dados', async () => 
   assert.equal(count(target.raw, 'species WHERE is_custom = 1'), 1, 'espécie manual restaurada');
   assert.equal(count(target.raw, 'aquariums WHERE is_demo = 1'), 2, 'marca de exemplo preservada');
   assert.equal(count(target.raw, 'aquariums WHERE image_uri IS NOT NULL'), 0, 'fotos não viajam no backup');
+  assert.equal(count(source.raw, 'aquarium_species WHERE image_uri IS NOT NULL'), 1, 'foto do organismo salva');
+  assert.equal(count(target.raw, 'aquarium_species WHERE image_uri IS NOT NULL'), 0, 'foto do organismo não viaja');
   assert.equal(notifications.scheduled.size, 1, 'lembrete reagendado no novo aparelho');
 });
 

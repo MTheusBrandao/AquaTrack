@@ -158,6 +158,7 @@ export const demoDataService = {
               quantity: organism.quantity,
               addedAt: toLocalDateString(daysFromNow(-setupDaysAgo + 30, 12)),
               notes: null,
+              imageUri: null,
             },
             now,
           );

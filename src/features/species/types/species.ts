@@ -46,6 +46,8 @@ export type AquariumOrganism = {
   /** Data local no formato YYYY-MM-DD */
   addedAt: string | null;
   notes: string | null;
+  /** Caminho relativo da foto no armazenamento do app, ou URI temporário recém-escolhido. */
+  imageUri: string | null;
   species: Species;
 };
 
@@ -53,4 +55,5 @@ export type AquariumOrganismInput = {
   quantity: number;
   addedAt: string | null;
   notes: string | null;
+  imageUri: string | null;
 };

@@ -28,7 +28,7 @@ export const BACKUP_TABLES = [
   },
   {
     name: 'aquarium_species',
-    columns: ['id', 'aquarium_id', 'species_id', 'quantity', 'added_at', 'notes', 'created_at'],
+    columns: ['id', 'aquarium_id', 'species_id', 'quantity', 'added_at', 'notes', 'image_uri', 'created_at'],
     where: '1 = 1',
   },
   {
@@ -68,6 +68,7 @@ export type BackupData = Record<BackupTableName, BackupRow[]>;
 /** Colunas que não fazem sentido em outro aparelho e são zeradas na restauração. */
 const DEVICE_SPECIFIC_COLUMNS: Partial<Record<BackupTableName, string[]>> = {
   aquariums: ['image_uri'],
+  aquarium_species: ['image_uri'],
   maintenance_tasks: ['notification_id'],
 };
 
@@ -115,7 +116,9 @@ export const backupRepository = {
 
   async listImagePaths(db: SQLiteDatabase): Promise<string[]> {
     const rows = await db.getAllAsync<{ image_uri: string }>(
-      'SELECT image_uri FROM aquariums WHERE image_uri IS NOT NULL',
+      `SELECT image_uri FROM aquariums WHERE image_uri IS NOT NULL
+       UNION ALL
+       SELECT image_uri FROM aquarium_species WHERE image_uri IS NOT NULL`,
     );
     return rows.map((row) => row.image_uri);
   },
