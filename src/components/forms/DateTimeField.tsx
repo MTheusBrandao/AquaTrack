@@ -41,6 +41,7 @@ export function DateTimeField({
           minimumDate={minimumDate}
           maximumDate={maximumDate}
           accentColor={colors.primary}
+          themeVariant="dark"
           onValueChange={(_event, selected) => onChange(selected.toISOString())}
         />
       </View>
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     paddingHorizontal: spacing.md,
   },
   flex: {

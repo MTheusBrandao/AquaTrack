@@ -28,7 +28,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: 'wa
   const highlighted = tone && value > 0;
   return (
     <Card style={styles.stat}>
-      <AppText variant="title" color={highlighted ? tone : 'textPrimary'}>
+      <AppText variant="metric" color={highlighted ? tone : 'textPrimary'}>
         {value}
       </AppText>
       <AppText variant="caption" color="textSecondary">

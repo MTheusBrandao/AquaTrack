@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import Svg, { Circle, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Animated, { Easing, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
-import { colors, sizes, spacing, typography } from '@/theme';
+import { colors, fontFamilyFor, sizes, spacing, typography } from '@/theme';
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const DRAW_MS = 650;
 
 export type ChartPoint = {
   /** Timestamp em ms. */
@@ -23,7 +27,7 @@ type LineChartProps = {
 };
 
 const PADDING = { top: 12, right: 12, bottom: 24, left: 44 };
-const POINT_RADIUS = 4;
+const POINT_RADIUS = 4.5;
 
 /**
  * Gráfico de linha simples em SVG. Feito sob medida (sem biblioteca) para desenhar a faixa
@@ -68,14 +72,36 @@ export function LineChart({
     PADDING.left + (xMax === xMin ? plotWidth / 2 : ((x - xMin) / (xMax - xMin)) * plotWidth);
   const scaleY = (y: number) => PADDING.top + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
 
-  const linePath = points
-    .map((point, index) => `${index === 0 ? 'M' : 'L'}${scaleX(point.x)},${scaleY(point.y)}`)
-    .join(' ');
+  const coords = points.map((point) => ({ x: scaleX(point.x), y: scaleY(point.y) }));
+  const linePath = coords.map((c, index) => `${index === 0 ? 'M' : 'L'}${c.x},${c.y}`).join(' ');
+  const baseline = PADDING.top + plotHeight;
+  const areaPath =
+    coords.length > 1
+      ? `${linePath} L${coords[coords.length - 1].x},${baseline} L${coords[0].x},${baseline} Z`
+      : '';
+  // Comprimento da linha para o efeito de "desenhar" (traço que avança do início ao fim).
+  const lineLength = coords.reduce(
+    (total, c, index) => (index === 0 ? 0 : total + Math.hypot(c.x - coords[index - 1].x, c.y - coords[index - 1].y)),
+    0,
+  );
+
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = 0;
+    progress.value = withTiming(1, { duration: DRAW_MS, easing: Easing.out(Easing.cubic) });
+  }, [linePath, progress]);
+  const lineProps = useAnimatedProps(() => ({
+    strokeDashoffset: lineLength * (1 - progress.value),
+  }));
 
   const bandTop = scaleY(referenceMax ?? yMax);
   const bandBottom = scaleY(referenceMin ?? yMin);
   const hasBand = referenceMin !== null || referenceMax !== null;
-  const labelStyle = { fontSize: typography.tabLabel.fontSize, fill: colors.textSecondary };
+  const labelStyle = {
+    fontSize: typography.overline.fontSize,
+    fontFamily: fontFamilyFor('600'),
+    fill: colors.textSecondary,
+  };
 
   return (
     <View
@@ -86,15 +112,35 @@ export function LineChart({
       accessibilityLabel={accessibilityLabel}>
       {width > 0 && points.length > 0 ? (
         <Svg width={width} height={height}>
+          <Defs>
+            <LinearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={colors.primary} stopOpacity={0.28} />
+              <Stop offset="1" stopColor={colors.primary} stopOpacity={0} />
+            </LinearGradient>
+          </Defs>
           {hasBand ? (
-            <Rect
-              x={PADDING.left}
-              y={bandTop}
-              width={plotWidth}
-              height={Math.max(bandBottom - bandTop, 2)}
-              fill={colors.secondary}
-              opacity={0.35}
-            />
+            <>
+              <Rect
+                x={PADDING.left}
+                y={bandTop}
+                width={plotWidth}
+                height={Math.max(bandBottom - bandTop, 2)}
+                rx={8}
+                fill={colors.secondary}
+              />
+              {[bandTop, bandBottom].map((y) => (
+                <Line
+                  key={y}
+                  x1={PADDING.left}
+                  x2={PADDING.left + plotWidth}
+                  y1={y}
+                  y2={y}
+                  stroke={colors.success}
+                  strokeOpacity={0.35}
+                  strokeDasharray="4 5"
+                />
+              ))}
+            </>
           ) : null}
 
           {[yMax, (yMin + yMax) / 2, yMin].map((value) => (
@@ -111,7 +157,19 @@ export function LineChart({
           />
 
           {points.length > 1 ? (
-            <Path d={linePath} stroke={colors.primary} strokeWidth={2} fill="none" strokeLinejoin="round" />
+            <>
+              <Path d={areaPath} fill="url(#area)" />
+              <AnimatedPath
+                d={linePath}
+                stroke={colors.primary}
+                strokeWidth={2.5}
+                fill="none"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                strokeDasharray={[lineLength, lineLength]}
+                animatedProps={lineProps}
+              />
+            </>
           ) : null}
           {points.map((point) => (
             <Circle
@@ -121,7 +179,7 @@ export function LineChart({
               r={POINT_RADIUS}
               fill={point.highlighted ? colors.warning : colors.surface}
               stroke={point.highlighted ? colors.warning : colors.primary}
-              strokeWidth={2}
+              strokeWidth={2.5}
             />
           ))}
 

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { borderWidth, colors, radius, sizes, spacing, type ColorToken } from '@/theme';
 
 import { AppText } from './AppText';
+import { PressableScale } from './PressableScale';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
 type ButtonSize = 'regular' | 'small';
@@ -36,26 +37,20 @@ export function Button({
   const isDisabled = disabled || loading;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        size === 'small' && styles.small,
-        styles[variant],
-        pressed && styles.pressed,
-        isDisabled && styles.disabled,
-      ]}>
+      style={[styles.base, size === 'small' && styles.small, styles[variant], isDisabled && styles.disabled]}>
       <View style={styles.content}>
         {loading ? <ActivityIndicator size="small" color={colors[textColor[variant]]} /> : icon}
-        <AppText variant="label" color={textColor[variant]}>
+        <AppText variant="label" color={textColor[variant]} style={styles.text}>
           {label}
         </AppText>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -75,24 +70,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primaryMuted,
     borderWidth: borderWidth.hairline,
-    borderColor: colors.primary,
+    borderColor: colors.primaryMuted,
   },
   danger: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.criticalMuted,
     borderWidth: borderWidth.hairline,
-    borderColor: colors.critical,
+    borderColor: colors.criticalMuted,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  pressed: {
-    opacity: 0.85,
-  },
   disabled: {
     opacity: 0.5,
+  },
+  text: {
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

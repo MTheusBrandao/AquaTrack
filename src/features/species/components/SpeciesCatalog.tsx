@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText, Button, Card, Chip } from '@/components/ui';
-import { borderWidth, colors, radius, sizes, spacing, typography } from '@/theme';
+import { borderWidth, colors, fontFamilyFor, radius, sizes, spacing, typography } from '@/theme';
 
 import { SPECIES_CATEGORIES, SPECIES_CATEGORY_LABELS, type Species, type SpeciesCategory } from '../types/species';
 import { SpeciesIcon } from './SpeciesIcon';
@@ -117,14 +117,16 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minHeight: sizes.inputHeight,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
   },
   searchInput: {
     flex: 1,
     ...typography.body,
+    fontFamily: fontFamilyFor(typography.body.fontWeight),
+    fontWeight: 'normal',
     color: colors.textPrimary,
     paddingVertical: spacing.sm,
   },

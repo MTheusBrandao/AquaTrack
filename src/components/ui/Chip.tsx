@@ -1,8 +1,10 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { borderWidth, colors, radius, spacing } from '@/theme';
 
 import { AppText } from './AppText';
+import { selectionFeedback } from './haptics';
+import { PressableScale } from './PressableScale';
 
 type ChipProps = {
   label: string;
@@ -12,29 +14,36 @@ type ChipProps = {
 
 export function Chip({ label, selected, onPress }: ChipProps) {
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      onPress={onPress}
+      onPress={() => {
+        if (!selected) selectionFeedback();
+        onPress();
+      }}
       style={[styles.chip, selected && styles.selected]}>
-      <AppText variant="caption" color={selected ? 'onPrimary' : 'textPrimary'}>
+      <AppText variant="label" color={selected ? 'onPrimary' : 'textPrimary'} style={!selected && styles.idleText}>
         {label}
       </AppText>
-    </Pressable>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm - 2,
+    minHeight: 36,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
     borderRadius: radius.pill,
     borderWidth: borderWidth.hairline,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
   },
   selected: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
+  },
+  idleText: {
+    fontWeight: '600',
   },
 });

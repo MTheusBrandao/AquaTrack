@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card, StatusPill, type StatusTone } from '@/components/ui';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { colors, sizes, spacing } from '@/theme';
 import { formatRelativeDay } from '@/utils/format';
 
@@ -32,7 +33,7 @@ export function ParameterCard({ summary, aquariumId }: ParameterCardProps) {
   const { parameter, latest, previous, status } = summary;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={`Histórico de ${parameter.name}`}
       onPress={() =>
@@ -41,15 +42,15 @@ export function ParameterCard({ summary, aquariumId }: ParameterCardProps) {
           params: { id: aquariumId, parameter: parameter.id },
         })
       }
-      style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}>
+      style={styles.pressable}>
       <Card style={styles.card}>
-        <AppText variant="caption" color="textSecondary">
+        <AppText variant="overline" color="textSecondary">
           {parameter.name}
         </AppText>
         {latest ? (
           <>
             <View style={styles.valueRow}>
-              <AppText variant="title">{formatParameterValue(latest.value, parameter.decimals)}</AppText>
+              <AppText variant="metric">{formatParameterValue(latest.value, parameter.decimals)}</AppText>
               <AppText variant="caption" color="textSecondary">
                 {parameter.unit === 'pH' ? '' : parameter.unit}
               </AppText>
@@ -63,7 +64,7 @@ export function ParameterCard({ summary, aquariumId }: ParameterCardProps) {
         ) : (
           <>
             {/* Sem registro é diferente de zero: mostramos explicitamente "não medido". */}
-            <AppText variant="title" color="textSecondary">
+            <AppText variant="metric" color="textSecondary">
               —
             </AppText>
             <AppText variant="caption" color="textSecondary">
@@ -72,7 +73,7 @@ export function ParameterCard({ summary, aquariumId }: ParameterCardProps) {
           </>
         )}
       </Card>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -80,9 +81,6 @@ const styles = StyleSheet.create({
   pressable: {
     width: '48%',
     flexGrow: 1,
-  },
-  pressed: {
-    opacity: 0.85,
   },
   card: {
     gap: spacing.xs,

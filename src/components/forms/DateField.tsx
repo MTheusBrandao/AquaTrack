@@ -71,6 +71,7 @@ export function DateField({ value, onChange, label, placeholder, hasError }: Dat
           locale="pt-BR"
           maximumDate={maximumDate}
           accentColor={colors.primary}
+          themeVariant="dark"
           onValueChange={(_event, selected) => onChange(toLocalDateString(selected))}
         />
       ) : null}
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     paddingHorizontal: spacing.md,
   },
   error: {

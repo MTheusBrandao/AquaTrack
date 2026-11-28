@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xxs,
   },
   text: {
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { AppText } from '@/components/ui';
-import { borderWidth, colors, radius, sizes, spacing, typography } from '@/theme';
+import { borderWidth, colors, fontFamilyFor, radius, sizes, spacing, typography } from '@/theme';
 
 import { Field } from './Field';
 
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     paddingHorizontal: spacing.md,
   },
   multiline: {
@@ -57,6 +57,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...typography.body,
+    fontFamily: fontFamilyFor(typography.body.fontWeight),
+    fontWeight: 'normal',
     color: colors.textPrimary,
     paddingVertical: spacing.sm,
   },

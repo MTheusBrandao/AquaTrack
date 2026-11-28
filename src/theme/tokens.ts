@@ -14,10 +14,10 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 10,
+  md: 16,
+  lg: 24,
+  xl: 28,
   pill: 999,
 } as const;
 
@@ -27,35 +27,39 @@ export const borderWidth = {
 } as const;
 
 export const typography = {
-  display: { fontSize: 28, lineHeight: 34, fontWeight: '700' },
-  title: { fontSize: 22, lineHeight: 28, fontWeight: '700' },
-  subtitle: { fontSize: 17, lineHeight: 24, fontWeight: '600' },
-  body: { fontSize: 15, lineHeight: 22, fontWeight: '400' },
-  label: { fontSize: 14, lineHeight: 20, fontWeight: '600' },
-  caption: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
-  tabLabel: { fontSize: 11, lineHeight: 14, fontWeight: '600' },
+  display: { fontSize: 30, lineHeight: 36, fontWeight: '800', letterSpacing: -0.4 },
+  /** Valores medidos em destaque; números tabulares para não "pularem" ao mudar. */
+  metric: { fontSize: 28, lineHeight: 32, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  title: { fontSize: 22, lineHeight: 28, fontWeight: '800' },
+  subtitle: { fontSize: 18, lineHeight: 24, fontWeight: '700' },
+  body: { fontSize: 15, lineHeight: 22, fontWeight: '500' },
+  label: { fontSize: 14, lineHeight: 20, fontWeight: '700' },
+  caption: { fontSize: 13, lineHeight: 18, fontWeight: '500' },
+  overline: { fontSize: 11, lineHeight: 14, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
+  tabLabel: { fontSize: 12, lineHeight: 16, fontWeight: '700' },
 } as const satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
 
-/** Sombras discretas: o design é baseado em bordas, a elevação só separa camadas. */
+/** No escuro a separação vem das bordas; a sombra só destaca o que flutua (barra de abas, FAB). */
 export const elevation = {
   none: {},
-  low: Platform.select<ViewStyle>({
+  low: {},
+  floating: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: colors.textPrimary,
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
-      shadowOffset: { width: 0, height: 2 },
+      shadowColor: colors.shadow,
+      shadowOpacity: 0.45,
+      shadowRadius: 18,
+      shadowOffset: { width: 0, height: 10 },
     },
-    default: { elevation: 1 },
+    default: { elevation: 12 },
   }),
 } as const;
 
 export const sizes = {
-  buttonHeight: 48,
+  buttonHeight: 52,
   buttonHeightSmall: 36,
-  inputHeight: 48,
+  inputHeight: 50,
   thumbnail: 64,
   heroImage: 200,
   iconSm: 18,
@@ -67,4 +71,6 @@ export const sizes = {
   parameterCardMinHeight: 132,
   emptyStateIcon: 64,
   tabBarHeight: 64,
+  /** Espaço que telas de aba reservam no fim para a barra flutuante não cobrir conteúdo. */
+  tabBarClearance: 104,
 } as const;

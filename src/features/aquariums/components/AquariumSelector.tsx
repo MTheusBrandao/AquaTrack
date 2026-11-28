@@ -1,7 +1,4 @@
-import { ScrollView, StyleSheet } from 'react-native';
-
-import { Chip } from '@/components/ui';
-import { spacing } from '@/theme';
+import { Chip, ChipRow } from '@/components/ui';
 
 type AquariumSelectorProps = {
   aquariums: { id: string; name: string }[];
@@ -16,7 +13,7 @@ export function AquariumSelector({ aquariums, selectedId, onSelect, showSingle }
   if (aquariums.length === 0 || (aquariums.length === 1 && !showSingle)) return null;
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <ChipRow>
       {aquariums.map((aquarium) => (
         <Chip
           key={aquarium.id}
@@ -25,12 +22,7 @@ export function AquariumSelector({ aquariums, selectedId, onSelect, showSingle }
           onPress={() => onSelect(aquarium.id)}
         />
       ))}
-    </ScrollView>
+    </ChipRow>
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    gap: spacing.sm,
-  },
-});

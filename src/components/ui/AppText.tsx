@@ -1,6 +1,6 @@
-import { Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { colors, typography, type ColorToken, type TypographyVariant } from '@/theme';
+import { colors, fontFamilyFor, typography, type ColorToken, type TypographyVariant } from '@/theme';
 
 type AppTextProps = TextProps & {
   variant?: TypographyVariant;
@@ -15,9 +15,16 @@ export function AppText({
   style,
   ...rest
 }: AppTextProps) {
+  // O peso final (variante + sobrescritas em `style`) escolhe o arquivo da Manrope.
+  const flat = StyleSheet.flatten([typography[variant], style]);
   return (
     <Text
-      style={[typography[variant], { color: colors[color], textAlign: align }, style]}
+      style={[
+        typography[variant],
+        { color: colors[color], textAlign: align },
+        style,
+        { fontFamily: fontFamilyFor(flat?.fontWeight), fontWeight: 'normal' },
+      ]}
       {...rest}
     />
   );

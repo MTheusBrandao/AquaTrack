@@ -41,7 +41,7 @@ export function Result({ label, value }: { label: string; value: string | null }
       <AppText variant="caption" color="textSecondary">
         {label}
       </AppText>
-      <AppText variant="title" color={value ? 'primary' : 'textSecondary'}>
+      <AppText variant="metric" color={value ? 'primary' : 'textSecondary'}>
         {value ?? '—'}
       </AppText>
     </View>

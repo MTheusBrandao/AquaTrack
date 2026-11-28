@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
+import { selectionFeedback } from '@/components/ui/haptics';
+import { PressableScale } from '@/components/ui/PressableScale';
 import { borderWidth, colors, radius, sizes, spacing } from '@/theme';
 
 type Option<T extends string> = { value: T; label: string };
@@ -21,16 +23,19 @@ export function SegmentedControl<T extends string>({
       {options.map((option) => {
         const selected = option.value === value;
         return (
-          <Pressable
+          <PressableScale
             key={option.value}
             accessibilityRole="radio"
             accessibilityState={{ selected }}
-            onPress={() => onChange(option.value)}
+            onPress={() => {
+              if (!selected) selectionFeedback();
+              onChange(option.value);
+            }}
             style={[styles.segment, selected && styles.selected]}>
             <AppText variant="label" color={selected ? 'onPrimary' : 'textPrimary'}>
               {option.label}
             </AppText>
-          </Pressable>
+          </PressableScale>
         );
       })}
     </View>
@@ -42,15 +47,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: spacing.xs,
     gap: spacing.xs,
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSunken,
   },
   segment: {
     flex: 1,
     minHeight: sizes.buttonHeightSmall,
-    borderRadius: radius.sm,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },

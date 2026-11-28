@@ -1,6 +1,6 @@
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { borderWidth, colors, elevation, radius, spacing } from '@/theme';
+import { borderWidth, colors, radius, spacing } from '@/theme';
 
 export function Card({ style, ...rest }: ViewProps) {
   return <View style={[styles.card, style]} {...rest} />;
@@ -13,6 +13,5 @@ const styles = StyleSheet.create({
     borderWidth: borderWidth.hairline,
     borderColor: colors.border,
     padding: spacing.lg,
-    ...elevation.low,
   },
 });

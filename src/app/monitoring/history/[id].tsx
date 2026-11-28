@@ -2,13 +2,14 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { ChartLine, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { LineChart } from '@/components/charts/LineChart';
 import {
   AppText,
   Card,
   Chip,
+  ChipRow,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -100,7 +101,7 @@ export default function ParameterHistoryScreen() {
     <Screen>
       <Stack.Screen options={{ title: data.aquarium.name }} />
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
+      <ChipRow>
         {data.parameters.map((item) => (
           <Chip
             key={item.id}
@@ -109,7 +110,7 @@ export default function ParameterHistoryScreen() {
             onPress={() => setParameterId(item.id)}
           />
         ))}
-      </ScrollView>
+      </ChipRow>
 
       <View style={styles.chips}>
         {PERIODS.map((value) => (
@@ -195,9 +196,6 @@ const styles = StyleSheet.create({
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  chipsRow: {
     gap: spacing.sm,
   },
   chartCard: {
